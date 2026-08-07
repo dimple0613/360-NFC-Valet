@@ -20,6 +20,6 @@
       "package": "com.valet.threesixtynfc"
     },
     "web": {},
-    "newArchEnabled": true
+    "newArchEnabled": false
   }
 }
