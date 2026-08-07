@@ -236,7 +236,7 @@ export default (props: DriverCarDetailsProps) => {
 										borderWidth: 1,
 										padding: 16,
 									}}
-									onPress={() => alert('Pressed!')}
+						onPress={() => props.navigation.navigate('DriverUpdateParking')}
 									activeOpacity={0.8}>
 									<Text
 										style={{
