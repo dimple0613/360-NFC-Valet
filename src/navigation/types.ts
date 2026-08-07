@@ -3,6 +3,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 export type RootStackParamList = {
   DriverLogin: undefined;
   DriverSelectLocation: undefined;
+  DriverNfcTap: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

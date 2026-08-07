@@ -440,7 +440,7 @@ export default (props: DriverSelectLocationProps) => {
 						paddingHorizontal: 24,
 					}}>
 					<TouchableOpacity
-						onPress={() => alert('Pressed!')}
+						onPress={() => props.navigation.navigate('DriverNfcTap')}
 						activeOpacity={0.8}>
 						<LinearGradient
 							start={{x:0, y:0.5}}
