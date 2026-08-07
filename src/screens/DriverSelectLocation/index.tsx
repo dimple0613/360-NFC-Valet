@@ -7,18 +7,15 @@ type DriverSelectLocationProps = RootStackScreenProps<"DriverSelectLocation">;
 export default (props: DriverSelectLocationProps) => {
 	const [textInput1, onChangeTextInput1] = useState('');
 	return (
-		<LinearGradient
-			colors={["#0D0221", "#1A0A3E", "#2D1B69"]}
-			style={{
-				flex: 1,
-			}}>
 		<SafeAreaView
 			style={{
 				flex: 1,
+				backgroundColor: "#FFFFFF",
 			}}>
 			<ScrollView
 				style={{
 					flex: 1,
+					backgroundColor: "#F8FAFC",
 				}}>
 				<View
 					style={{
@@ -34,7 +31,7 @@ export default (props: DriverSelectLocationProps) => {
 						}}>
 						<Text
 							style={{
-								color: "#FFFFFF",
+								color: "#0F172A",
 								fontSize: 14,
 								fontWeight: "bold",
 							}}>
@@ -86,7 +83,7 @@ export default (props: DriverSelectLocationProps) => {
 							}}>
 							<Text
 								style={{
-									color: "#A0A0C0",
+									color: "#64748B",
 									fontSize: 14,
 									marginBottom: 2,
 								}}>
@@ -94,7 +91,7 @@ export default (props: DriverSelectLocationProps) => {
 							</Text>
 							<Text
 								style={{
-									color: "#FFFFFF",
+									color: "#0F172A",
 									fontSize: 22,
 									fontWeight: "bold",
 								}}>
@@ -123,7 +120,7 @@ export default (props: DriverSelectLocationProps) => {
 							}}>
 							<Text
 								style={{
-									color: "#FFFFFF",
+									color: "#0F172A",
 									fontSize: 22,
 									fontWeight: "bold",
 								}}>
@@ -132,7 +129,7 @@ export default (props: DriverSelectLocationProps) => {
 						</View>
 						<Text
 							style={{
-								color: "#A0A0C0",
+								color: "#64748B",
 								fontSize: 14,
 								marginLeft: 24,
 							}}>
@@ -143,8 +140,8 @@ export default (props: DriverSelectLocationProps) => {
 						style={{
 							flexDirection: "row",
 							alignItems: "center",
-							backgroundColor: "#FFFFFF14",
-							borderColor: "#FFFFFF33",
+							backgroundColor: "#FFFFFF",
+							borderColor: "#E2E8F0",
 							borderRadius: 24,
 							borderWidth: 1,
 							marginBottom: 16,
@@ -163,11 +160,11 @@ export default (props: DriverSelectLocationProps) => {
 						/>
 						<TextInput
 							placeholder={"Search hotel or center name..."}
-							placeholderTextColor="#A0A0C0"
+							placeholderTextColor="#64748B"
 							value={textInput1}
 							onChangeText={onChangeTextInput1}
 							style={{
-								color: "#FFFFFF",
+								color: "#0F172A",
 								fontSize: 14,
 								marginRight: 4,
 								flex: 1,
@@ -183,12 +180,20 @@ export default (props: DriverSelectLocationProps) => {
 							style={{
 								flexDirection: "row",
 								alignItems: "center",
-								backgroundColor: "#FFFFFF14",
+								backgroundColor: "#FFFFFF",
 								borderColor: "#6C63FF",
 								borderRadius: 16,
 								borderWidth: 2,
 								padding: 16,
 								marginBottom: 12,
+								shadowColor: "#0F172A08",
+								shadowOpacity: 1,
+								shadowOffset: {
+								    width: 0,
+								    height: 4
+								},
+								shadowRadius: 12,
+								elevation: 12,
 							}}>
 							<View
 								style={{
@@ -196,7 +201,7 @@ export default (props: DriverSelectLocationProps) => {
 									width: 44,
 									height: 44,
 									marginRight: 16,
-									backgroundColor: "#6C63FF40",
+									backgroundColor: "#6C63FF20",
 									alignItems: "center",
 									justifyContent: "center",
 								}}>
@@ -216,7 +221,7 @@ export default (props: DriverSelectLocationProps) => {
 								}}>
 								<Text
 									style={{
-										color: "#FFFFFF",
+										color: "#0F172A",
 										fontSize: 16,
 										fontWeight: "bold",
 										marginBottom: 2,
@@ -225,7 +230,7 @@ export default (props: DriverSelectLocationProps) => {
 								</Text>
 								<Text
 									style={{
-										color: "#A0A0C0",
+										color: "#64748B",
 										fontSize: 12,
 									}}>
 									{"100 Ritz-Carlton Dr"}
@@ -236,25 +241,32 @@ export default (props: DriverSelectLocationProps) => {
 									width: 24,
 									height: 24,
 									borderRadius: 12,
-									borderWidth: 2,
 									borderColor: "#6C63FF",
 									backgroundColor: "#6C63FF",
 									alignItems: "center",
 									justifyContent: "center",
 								}}>
-								<Text style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "bold" }}>{"✓"}</Text>
+								<Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "bold" }}>{"✓"}</Text>
 							</View>
 						</View>
 						<View
 							style={{
 								flexDirection: "row",
 								alignItems: "center",
-								backgroundColor: "#FFFFFF14",
-								borderColor: "#FFFFFF33",
+								backgroundColor: "#FFFFFF",
+								borderColor: "#E2E8F0",
 								borderRadius: 16,
 								borderWidth: 1,
 								padding: 16,
 								marginBottom: 12,
+								shadowColor: "#0F172A08",
+								shadowOpacity: 1,
+								shadowOffset: {
+								    width: 0,
+								    height: 4
+								},
+								shadowRadius: 12,
+								elevation: 12,
 							}}>
 							<View
 								style={{
@@ -262,7 +274,7 @@ export default (props: DriverSelectLocationProps) => {
 									width: 44,
 									height: 44,
 									marginRight: 16,
-									backgroundColor: "#FFFFFF20",
+									backgroundColor: "#F1F5F9",
 									alignItems: "center",
 									justifyContent: "center",
 								}}>
@@ -282,7 +294,7 @@ export default (props: DriverSelectLocationProps) => {
 								}}>
 								<Text
 									style={{
-										color: "#FFFFFF",
+										color: "#0F172A",
 										fontSize: 16,
 										fontWeight: "bold",
 										marginBottom: 2,
@@ -291,7 +303,7 @@ export default (props: DriverSelectLocationProps) => {
 								</Text>
 								<Text
 									style={{
-										color: "#A0A0C0",
+										color: "#64748B",
 										fontSize: 12,
 									}}>
 									{"250 Ocean Boulevard"}
@@ -302,12 +314,20 @@ export default (props: DriverSelectLocationProps) => {
 							style={{
 								flexDirection: "row",
 								alignItems: "center",
-								backgroundColor: "#FFFFFF14",
-								borderColor: "#FFFFFF33",
+								backgroundColor: "#FFFFFF",
+								borderColor: "#E2E8F0",
 								borderRadius: 16,
 								borderWidth: 1,
 								padding: 16,
 								marginBottom: 12,
+								shadowColor: "#0F172A08",
+								shadowOpacity: 1,
+								shadowOffset: {
+								    width: 0,
+								    height: 4
+								},
+								shadowRadius: 12,
+								elevation: 12,
 							}}>
 							<View
 								style={{
@@ -315,7 +335,7 @@ export default (props: DriverSelectLocationProps) => {
 									width: 44,
 									height: 44,
 									marginRight: 16,
-									backgroundColor: "#FFFFFF20",
+									backgroundColor: "#F1F5F9",
 									alignItems: "center",
 									justifyContent: "center",
 								}}>
@@ -335,16 +355,17 @@ export default (props: DriverSelectLocationProps) => {
 								}}>
 								<Text
 									style={{
-										color: "#FFFFFF",
+										color: "#0F172A",
 										fontSize: 16,
 										fontWeight: "bold",
 										marginBottom: 2,
+										width: 138,
 									}}>
 									{"Mandarin Oriental Center"}
 								</Text>
 								<Text
 									style={{
-										color: "#A0A0C0",
+										color: "#64748B",
 										fontSize: 12,
 									}}>
 									{"75 Mandarin Way"}
@@ -355,11 +376,19 @@ export default (props: DriverSelectLocationProps) => {
 							style={{
 								flexDirection: "row",
 								alignItems: "center",
-								backgroundColor: "#FFFFFF14",
-								borderColor: "#FFFFFF33",
+								backgroundColor: "#FFFFFF",
+								borderColor: "#E2E8F0",
 								borderRadius: 16,
 								borderWidth: 1,
 								padding: 16,
+								shadowColor: "#0F172A08",
+								shadowOpacity: 1,
+								shadowOffset: {
+								    width: 0,
+								    height: 4
+								},
+								shadowRadius: 12,
+								elevation: 12,
 							}}>
 							<View
 								style={{
@@ -367,7 +396,7 @@ export default (props: DriverSelectLocationProps) => {
 									width: 44,
 									height: 44,
 									marginRight: 16,
-									backgroundColor: "#FFFFFF20",
+									backgroundColor: "#F1F5F9",
 									alignItems: "center",
 									justifyContent: "center",
 								}}>
@@ -387,7 +416,7 @@ export default (props: DriverSelectLocationProps) => {
 								}}>
 								<Text
 									style={{
-										color: "#FFFFFF",
+										color: "#0F172A",
 										fontSize: 16,
 										fontWeight: "bold",
 										marginBottom: 2,
@@ -396,7 +425,7 @@ export default (props: DriverSelectLocationProps) => {
 								</Text>
 								<Text
 									style={{
-										color: "#A0A0C0",
+										color: "#64748B",
 										fontSize: 12,
 									}}>
 									{"12 Suite Avenue"}
@@ -442,7 +471,7 @@ export default (props: DriverSelectLocationProps) => {
 							style={{
 								width: 139,
 								height: 5,
-								backgroundColor: "#FFFFFF",
+								backgroundColor: "#0F172A",
 								borderRadius: 100,
 								marginBottom: 8,
 							}}>
@@ -451,6 +480,5 @@ export default (props: DriverSelectLocationProps) => {
 				</View>
 			</ScrollView>
 		</SafeAreaView>
-		</LinearGradient>
 	)
 }
