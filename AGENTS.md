@@ -27,3 +27,12 @@ npm run doctor       # validate Expo project health
 2. Implement the change following the conventions above.
 3. Run `npm run typecheck` and fix any errors.
 4. Run `npm run doctor` if native module versions were touched.
+5. Commit and push the change:
+
+   ```bash
+   git add -A
+   git commit -m "describe the change"
+   git push
+   ```
+
+   Only push to GitHub when the user explicitly asks.
