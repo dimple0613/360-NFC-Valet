@@ -7,10 +7,14 @@ type DriverLoginProps = RootStackScreenProps<"DriverLogin">;
 export default (props: DriverLoginProps) => {
 	const [textInput1, onChangeTextInput1] = useState('');
 	return (
+		<LinearGradient
+			colors={["#0D0221", "#1A0A3E", "#2D1B69"]}
+			style={{
+				flex: 1,
+			}}>
 		<SafeAreaView 
 			style={{
 				flex: 1,
-				backgroundColor: "#FFFFFF",
 			}}>
 			<ScrollView  
 				style={{
@@ -191,16 +195,12 @@ export default (props: DriverLoginProps) => {
 							/>
 						</View>
 						<TouchableOpacity 
-							style={{
-								alignItems: "center",
-								borderRadius: 27,
-								paddingVertical: 17,
-								marginBottom: 16,
-							}} onPress={()=>alert('Pressed!')}>
+							onPress={()=>props.navigation.navigate('DriverSelectLocation')}
+							activeOpacity={0.8}>
 							<LinearGradient 
-								start={{x:0, y:0}}
-								end={{x:0, y:1}}
-								colors={["#6C63FF", "#7B61FF"]}
+								start={{x:0, y:0.5}}
+								end={{x:1, y:0.5}}
+								colors={["#5B5BFF", "#8B5CF6"]}
 								style={{
 									alignItems: "center",
 									borderRadius: 27,
@@ -250,5 +250,6 @@ export default (props: DriverLoginProps) => {
 				</View>
 			</ScrollView>
 		</SafeAreaView>
+		</LinearGradient>
 	)
 }
