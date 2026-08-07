@@ -102,5 +102,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full breakdown.
 
 ## Documentation
 
+- [PROJECT.md](./PROJECT.md) — project overview and implementation status
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — folder structure, data flow, conventions
 - [AGENTS.md](./AGENTS.md) — guidance for AI coding agents working in this repo
+- [docs/](./docs) — API reference, auth flow, data/storage, deployment, roles, testing, roadmap

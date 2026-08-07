@@ -106,6 +106,17 @@ src/
   loading / empty / error states.
 - Validation helpers in `src/utils` guard user input before requests.
 
+## Related Docs
+
+- [PROJECT.md](./PROJECT.md) — project overview and implementation status
+- [docs/API_REFERENCE.md](./docs/API_REFERENCE.md) — endpoint catalog
+- [docs/AUTH_FLOW.md](./docs/AUTH_FLOW.md) — authentication flows
+- [docs/DATABASE.md](./docs/DATABASE.md) — models & local storage
+- [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) — local dev + EAS/CI
+- [docs/ROLES_AND_PERMISSIONS.md](./docs/ROLES_AND_PERMISSIONS.md) — driver/admin roles
+- [docs/TESTING_STRATEGY.md](./docs/TESTING_STRATEGY.md) — test plan
+- [docs/ROADMAP.md](./docs/ROADMAP.md) — planned work
+
 ## Scaling Notes
 
 - **State:** for global auth/user state, introduce a context provider

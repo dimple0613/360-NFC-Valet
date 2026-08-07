@@ -148,6 +148,17 @@ Default roles:
 
 ---
 
+## Related Docs
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — folder structure, data flow, conventions
+- [docs/API_REFERENCE.md](./docs/API_REFERENCE.md) — endpoint catalog
+- [docs/AUTH_FLOW.md](./docs/AUTH_FLOW.md) — authentication flows
+- [docs/DATABASE.md](./docs/DATABASE.md) — models & local storage
+- [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) — local dev + EAS/CI
+- [docs/ROLES_AND_PERMISSIONS.md](./docs/ROLES_AND_PERMISSIONS.md) — driver/admin roles
+- [docs/TESTING_STRATEGY.md](./docs/TESTING_STRATEGY.md) — test plan
+- [docs/ROADMAP.md](./docs/ROADMAP.md) — planned work
+
 ## Implementation Status (Current State)
 
 > This section tracks how far the codebase matches the specification above.

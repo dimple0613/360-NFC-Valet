@@ -35,4 +35,6 @@ npm run doctor       # validate Expo project health
    git push
    ```
 
-   Only push to GitHub when the user explicitly asks.
+   After finishing a task, commit and push to GitHub automatically (remote `origin`, branch `main`) unless the user says otherwise.
+
+6. When a task changes features or behavior, update the relevant docs (`.md` files such as `README.md` or `docs/*.md`) to stay in sync, and include those doc updates in the same commit.
