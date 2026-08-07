@@ -171,90 +171,14 @@ export default (props: DriverNfcTapProps) => {
 								{"Hold the customer's RFID keycard against the back of your phone"}
 							</Text>
 						</View>
-						<View
+						<Image
+							source={require("../../../assets/nfc-tap.png")}
+							resizeMode={"contain"}
 							style={{
 								width: 260,
 								height: 260,
-								borderRadius: 130,
-								borderWidth: 1,
-								borderColor: "#E2E8F0",
-								backgroundColor: "#F8FAFC",
-								alignItems: "center",
-								justifyContent: "center",
-							}}>
-							<View
-								style={{
-									width: 200,
-									height: 200,
-									borderRadius: 100,
-									borderWidth: 1,
-									borderColor: "#E2E8F0",
-									backgroundColor: "#F8FAFC",
-									alignItems: "center",
-									justifyContent: "center",
-								}}>
-								<View
-									style={{
-										width: 140,
-										height: 140,
-										borderRadius: 70,
-										borderWidth: 1,
-										borderColor: "#E2E8F0",
-										backgroundColor: "#F1F5F9",
-										alignItems: "center",
-										justifyContent: "center",
-									}}>
-									<View
-										style={{
-											width: 80,
-											height: 80,
-											borderRadius: 40,
-											backgroundColor: "#6C63FF",
-											alignItems: "center",
-											justifyContent: "center",
-										}}>
-										<View style={{ flexDirection: "row", alignItems: "center" }}>
-											<View style={{
-												width: 5,
-												height: 5,
-												borderRadius: 3,
-												backgroundColor: "#FFFFFF",
-											}} />
-											<View style={{
-												width: 18,
-												height: 18,
-												borderTopWidth: 2,
-												borderLeftWidth: 2,
-												borderTopColor: "#FFFFFF",
-												borderLeftColor: "#FFFFFF",
-												borderTopLeftRadius: 12,
-												marginLeft: 2,
-											}} />
-											<View style={{
-												width: 28,
-												height: 28,
-												borderTopWidth: 2,
-												borderLeftWidth: 2,
-												borderTopColor: "#FFFFFF",
-												borderLeftColor: "#FFFFFF",
-												borderTopLeftRadius: 16,
-												marginLeft: -6,
-											}} />
-											<View style={{
-												width: 38,
-												height: 38,
-												borderTopWidth: 2,
-												borderLeftWidth: 2,
-												borderTopColor: "#FFFFFF",
-												borderLeftColor: "#FFFFFF",
-												borderTopLeftRadius: 20,
-												marginLeft: -8,
-											}} />
-										</View>
-									</View>
-								</View>
-							</View>
-						</View>
+							}}
+						/>
 					</View>
 				</View>
 				<View
