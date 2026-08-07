@@ -4,6 +4,7 @@ import DriverLogin from "../screens/DriverLogin";
 import DriverSelectLocation from "../screens/DriverSelectLocation";
 import DriverNfcTap from "../screens/DriverNfcTap";
 import DriverCarDetails from "../screens/DriverCarDetails";
+import DriverCardActivated from "../screens/DriverCardActivated";
 import DriverUpdateParking from "../screens/DriverUpdateParking";
 import type { RootStackParamList } from "./types";
 
@@ -16,6 +17,7 @@ const RootNavigator = () => {
       <Stack.Screen name="DriverSelectLocation" component={DriverSelectLocation} />
       <Stack.Screen name="DriverNfcTap" component={DriverNfcTap} />
       <Stack.Screen name="DriverCarDetails" component={DriverCarDetails} />
+      <Stack.Screen name="DriverCardActivated" component={DriverCardActivated} />
       <Stack.Screen name="DriverUpdateParking" component={DriverUpdateParking} />
     </Stack.Navigator>
   );
