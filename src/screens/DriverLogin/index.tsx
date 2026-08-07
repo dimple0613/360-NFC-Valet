@@ -42,7 +42,7 @@ export default (props: DriverLoginProps) => {
 								alignItems: "center",
 							}}>
 							<Image
-								source = {{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/U9397jm9XU/1bfou1v5_expires_30_days.png"}} 
+								source={require("../../../assets/status-signal.png")} 
 								resizeMode = {"stretch"}
 								style={{
 									width: 20,
@@ -51,7 +51,7 @@ export default (props: DriverLoginProps) => {
 								}}
 							/>
 							<Image
-								source = {{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/U9397jm9XU/dkfmwm0p_expires_30_days.png"}} 
+								source={require("../../../assets/status-wifi.png")} 
 								resizeMode = {"stretch"}
 								style={{
 									width: 20,
@@ -60,7 +60,7 @@ export default (props: DriverLoginProps) => {
 								}}
 							/>
 							<Image
-								source = {{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/U9397jm9XU/oi7nz5m6_expires_30_days.png"}} 
+								source={require("../../../assets/status-battery.png")} 
 								resizeMode = {"stretch"}
 								style={{
 									width: 28,
@@ -75,7 +75,7 @@ export default (props: DriverLoginProps) => {
 							paddingTop: 80,
 						}}>
 						<Image
-							source = {{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/U9397jm9XU/8heg0q8v_expires_30_days.png"}} 
+							source={require("../../../assets/logo.png")} 
 							resizeMode = {"stretch"}
 							style={{
 								borderRadius: 40,
@@ -123,7 +123,7 @@ export default (props: DriverLoginProps) => {
 								marginBottom: 16,
 							}}>
 							<Image
-								source = {{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/U9397jm9XU/midb2dur_expires_30_days.png"}} 
+								source={require("../../../assets/icon-email.png")} 
 								resizeMode = {"stretch"}
 								style={{
 									borderRadius: 27,
@@ -159,7 +159,7 @@ export default (props: DriverLoginProps) => {
 								marginBottom: 16,
 							}}>
 							<Image
-								source = {{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/U9397jm9XU/u3t06vr3_expires_30_days.png"}} 
+								source={require("../../../assets/icon-lock.png")} 
 								resizeMode = {"stretch"}
 								style={{
 									borderRadius: 27,
@@ -181,7 +181,7 @@ export default (props: DriverLoginProps) => {
 								}}>
 							</View>
 							<Image
-								source = {{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/U9397jm9XU/e7afsc5e_expires_30_days.png"}} 
+								source={require("../../../assets/icon-eye.png")} 
 								resizeMode = {"stretch"}
 								style={{
 									borderRadius: 27,
