@@ -4,6 +4,7 @@ export type RootStackParamList = {
   DriverLogin: undefined;
   DriverSelectLocation: undefined;
   DriverNfcTap: undefined;
+  DriverCarDetails: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

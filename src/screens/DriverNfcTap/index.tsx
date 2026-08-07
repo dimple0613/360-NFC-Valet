@@ -196,7 +196,7 @@ export default (props: DriverNfcTapProps) => {
 							paddingHorizontal: 16,
 							marginBottom: 20,
 						}}
-						onPress={() => alert('Pressed!')}
+						onPress={() => props.navigation.navigate('DriverCarDetails')}
 						activeOpacity={0.8}>
 						<View
 							style={{
