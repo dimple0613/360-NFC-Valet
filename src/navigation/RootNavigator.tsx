@@ -5,6 +5,7 @@ import DriverSelectLocation from "../screens/DriverSelectLocation";
 import DriverNfcTap from "../screens/DriverNfcTap";
 import DriverCarDetails from "../screens/DriverCarDetails";
 import DriverCardActivated from "../screens/DriverCardActivated";
+import DriverPickupRequests from "../screens/DriverPickupRequests";
 import DriverUpdateParking from "../screens/DriverUpdateParking";
 import type { RootStackParamList } from "./types";
 
