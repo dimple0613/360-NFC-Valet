@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
@@ -65,15 +66,27 @@ const DriverLogin = ({ navigation }: DriverLoginProps) => {
             <View style={styles.form}>
               <View style={styles.inputField}>
                 <Text style={styles.inputLabel}>Driver ID</Text>
-                <Text style={styles.inputValue}>{driverId}</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={driverId}
+                  onChangeText={setDriverId}
+                  placeholder="e.g. VD-0248"
+                  placeholderTextColor="#9AA6BC"
+                  autoCapitalize="characters"
+                />
               </View>
 
               <View style={styles.inputFieldRow}>
                 <View style={styles.inputFieldLeft}>
                   <Text style={styles.inputLabel}>Password</Text>
-                  <Text style={styles.passwordValue}>
-                    {passwordVisible ? password || "••••••••" : "••••••••"}
-                  </Text>
+                  <TextInput
+                    style={styles.textInputPassword}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="••••••••"
+                    placeholderTextColor="#9AA6BC"
+                    secureTextEntry={!passwordVisible}
+                  />
                 </View>
                 <TouchableOpacity
                   onPress={() => setPasswordVisible(!passwordVisible)}
@@ -193,6 +206,20 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#1C2B46",
     marginTop: 2,
+  },
+  textInput: {
+    fontSize: 15.5,
+    fontWeight: "700",
+    color: "#1C2B46",
+    marginTop: 2,
+    padding: 0,
+  },
+  textInputPassword: {
+    fontSize: 15.5,
+    fontWeight: "700",
+    color: "#1C2B46",
+    marginTop: 2,
+    padding: 0,
   },
   inputFieldRow: {
     backgroundColor: "#F6F7F9",
