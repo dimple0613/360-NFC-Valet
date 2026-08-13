@@ -1,240 +1,225 @@
 import React from "react";
-import { View, ScrollView, Text, Image, TouchableOpacity, } from "react-native";
-import {LinearGradient} from 'expo-linear-gradient';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing } from "react-native";
+import Svg, { Path, Rect, Circle } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { RootStackScreenProps } from "../../navigation";
+import MobileStatusBar from "../../components/ui/StatusBar";
+
 type DriverNfcTapProps = RootStackScreenProps<"DriverNfcTap">;
-export default (props: DriverNfcTapProps) => {
-	return (
-		<SafeAreaView
-			style={{
-				flex: 1,
-				backgroundColor: "#FFFFFF",
-			}}>
-			<ScrollView
-				style={{
-					flex: 1,
-					backgroundColor: "#F8FAFC",
-				}}>
-				<View
-					style={{
-						marginBottom: 169,
-					}}>
-					<View
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							alignItems: "center",
-							paddingVertical: 12,
-							paddingHorizontal: 24,
-						}}>
-						<Text
-							style={{
-								color: "#0F172A",
-								fontSize: 14,
-								fontWeight: "bold",
-							}}>
-							{"9:41"}
-						</Text>
-						<View
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-							}}>
-							<Image
-								source={require("../../../assets/status-signal.png")}
-								resizeMode={"stretch"}
-								style={{
-									width: 20,
-									height: 20,
-									marginRight: 8,
-								}}
-							/>
-							<Image
-								source={require("../../../assets/status-wifi.png")}
-								resizeMode={"stretch"}
-								style={{
-									width: 20,
-									height: 20,
-									marginRight: 8,
-								}}
-							/>
-							<Image
-								source={require("../../../assets/status-battery.png")}
-								resizeMode={"stretch"}
-								style={{
-									width: 28,
-									height: 20,
-								}}
-							/>
-						</View>
-					</View>
-					<LinearGradient
-						start={{x:0, y:0}}
-						end={{x:0, y:1}}
-						colors={["#2E0F54", "#0F103F"]}
-						style={{
-							borderBottomRightRadius: 24,
-							borderBottomLeftRadius: 24,
-							paddingTop: 20,
-							paddingBottom: 24,
-							paddingRight: 24,
-						}}>
-						<View
-							style={{
-								flexDirection: "row",
-								justifyContent: "space-between",
-								alignItems: "center",
-								marginBottom: 16,
-								marginLeft: 24,
-							}}>
-							<TouchableOpacity onPress={() => props.navigation.goBack()}>
-								<Image
-									source={require("../../../assets/icon-email.png")}
-									resizeMode={"stretch"}
-									style={{
-										borderRadius: 18,
-										width: 36,
-										height: 32,
-										tintColor: "#FFFFFF",
-									}}
-								/>
-							</TouchableOpacity>
-							<Text
-								style={{
-									color: "#FFFFFF",
-									fontSize: 18,
-									fontWeight: "bold",
-								}}>
-								{"NFC Tag Activation"}
-							</Text>
-							<View
-								style={{
-									width: 36,
-									height: 32,
-								}}>
-							</View>
-						</View>
-						<View
-							style={{
-								alignSelf: "flex-start",
-								flexDirection: "row",
-								alignItems: "center",
-								marginLeft: 24,
-							}}>
-							<View
-								style={{
-									width: 14,
-									height: 14,
-									borderRadius: 7,
-									backgroundColor: "#6C63FF",
-									marginRight: 8,
-								}}
-							/>
-							<Text
-								style={{
-									color: "#FFFFFF",
-									fontSize: 13,
-									fontWeight: "bold",
-								}}>
-								{"Ritz-Carlton Regent"}
-							</Text>
-						</View>
-					</LinearGradient>
-					<View
-						style={{
-							alignItems: "center",
-							paddingTop: 40,
-						}}>
-						<View
-							style={{
-								alignItems: "center",
-								paddingHorizontal: 3,
-								marginBottom: 32,
-							}}>
-							<Text
-								style={{
-									color: "#0F172A",
-									fontSize: 22,
-									fontWeight: "bold",
-									marginBottom: 8,
-								}}>
-								{"Tap NFC Card"}
-							</Text>
-							<Text
-								style={{
-									color: "#64748B",
-									fontSize: 14,
-									textAlign: "center",
-									width: 274,
-								}}>
-								{"Hold the customer's RFID keycard against the back of your phone"}
-							</Text>
-						</View>
-						<Image
-							source={require("../../../assets/nfc-tap.png")}
-							resizeMode={"contain"}
-							style={{
-								width: 260,
-								height: 260,
-							}}
-						/>
-					</View>
-				</View>
-				<View
-					style={{
-						alignItems: "center",
-						paddingBottom: 20,
-					}}>
-					<TouchableOpacity
-						style={{
-							flexDirection: "row",
-							alignItems: "center",
-							backgroundColor: "#E0F2FE",
-							borderRadius: 16,
-							paddingVertical: 8,
-							paddingHorizontal: 16,
-							marginBottom: 20,
-						}}
-						onPress={() => props.navigation.navigate('DriverCarDetails')}
-						activeOpacity={0.8}>
-						<View
-							style={{
-								width: 8,
-								height: 8,
-								borderRadius: 4,
-								backgroundColor: "#0369A1",
-								marginRight: 8,
-							}}
-						/>
-						<Text
-							style={{
-								color: "#0369A1",
-								fontSize: 13,
-								fontWeight: "bold",
-							}}>
-							{"Ready to Scan"}
-						</Text>
-					</TouchableOpacity>
-					<View
-						style={{
-							alignSelf: "stretch",
-							alignItems: "center",
-							paddingTop: 21,
-							marginHorizontal: 24,
-						}}>
-						<View
-							style={{
-								width: 139,
-								height: 5,
-								backgroundColor: "#0F172A",
-								borderRadius: 100,
-								marginBottom: 8,
-							}}>
-						</View>
-					</View>
-				</View>
-			</ScrollView>
-		</SafeAreaView>
-	)
-}
+
+const BackIcon = () => (
+  <Svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M15 5l-7 7 7 7" />
+  </Svg>
+);
+
+const NfcCardIcon = ({ size = 62 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <Rect x="4" y="2.5" width="16" height="19" rx="3" />
+    <Path d="M9.5 9.5a4.2 4.2 0 0 1 5 0" />
+    <Path d="M8 7a7 7 0 0 1 8 0" />
+    <Circle cx="12" cy="13.5" r="1.4" fill="#fff" stroke="none" />
+  </Svg>
+);
+
+const PulseRing = ({ delay }: { delay: number }) => {
+  const scale = React.useRef(new Animated.Value(1)).current;
+  const opacity = React.useRef(new Animated.Value(0.55)).current;
+
+  React.useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.parallel([
+          Animated.timing(scale, {
+            toValue: 1.9,
+            duration: 1800,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacity, {
+            toValue: 0,
+            duration: 1800,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(scale, {
+            toValue: 1,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacity, {
+            toValue: 0.55,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [delay, scale, opacity]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.pulseRing,
+        {
+          transform: [{ scale }],
+          opacity,
+        },
+      ]}
+    />
+  );
+};
+
+const DriverNfcTap = ({ navigation }: DriverNfcTapProps) => {
+  return (
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.flex}>
+        <MobileStatusBar />
+
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            activeOpacity={0.7}
+            onPress={() => navigation.goBack()}
+          >
+            <BackIcon />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>New arrival</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+
+        <View style={styles.centerContent}>
+          <View style={styles.nfcAnimationArea}>
+            <PulseRing delay={0} />
+            <PulseRing delay={600} />
+            <LinearGradient
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              colors={["#F4531F", "#FF8A50"]}
+              style={styles.nfcIconCircle}
+            >
+              <NfcCardIcon size={62} />
+            </LinearGradient>
+          </View>
+
+          <Text style={styles.holdTitle}>Hold card near phone</Text>
+          <Text style={styles.holdSubtitle}>
+            Reading writes the card ID automatically.{"\n"}You'll confirm the 4-digit UID printed on the card next.
+          </Text>
+        </View>
+
+        <View style={styles.bottomButtonContainer}>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("DriverCarDetails")}>
+            <View style={styles.manualButton}>
+              <Text style={styles.manualButtonText}>Enter card manually</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#131B2E",
+  },
+  flex: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingTop: 14,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#FFFFFF",
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  centerContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 34,
+  },
+  nfcAnimationArea: {
+    position: "relative",
+    width: 230,
+    height: 230,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pulseRing: {
+    position: "absolute",
+    inset: 0,
+    borderRadius: 99,
+    borderWidth: 2,
+    borderColor: "rgba(244,83,31,0.55)",
+  },
+  nfcIconCircle: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#F4531F",
+    shadowOpacity: 0.45,
+    shadowOffset: { width: 0, height: 18 },
+    shadowRadius: 44,
+    elevation: 10,
+  },
+  holdTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    marginTop: 36,
+  },
+  holdSubtitle: {
+    fontSize: 13.5,
+    fontWeight: "500",
+    color: "#9FB0CC",
+    marginTop: 8,
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  bottomButtonContainer: {
+    paddingHorizontal: 26,
+    paddingBottom: 36,
+  },
+  manualButton: {
+    padding: 15,
+    borderRadius: 99,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.14)",
+    alignItems: "center",
+  },
+  manualButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14.5,
+    fontWeight: "700",
+  },
+});
+
+export default DriverNfcTap;

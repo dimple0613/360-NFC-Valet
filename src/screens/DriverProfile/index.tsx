@@ -1,0 +1,382 @@
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import Svg, { Path, Rect, Circle } from "react-native-svg";
+import { SafeAreaView } from "react-native-safe-area-context";
+import type { RootStackScreenProps } from "../../navigation";
+import MobileStatusBar from "../../components/ui/StatusBar";
+
+type DriverProfileProps = RootStackScreenProps<"DriverProfile">;
+
+const BuildingIcon = () => (
+  <Svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1C2B46" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M3 21h18" />
+    <Path d="M5 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16" />
+    <Path d="M15 9h4v12" />
+  </Svg>
+);
+
+const BellIcon = () => (
+  <Svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1C2B46" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+    <Path d="M10.3 21a2 2 0 0 0 3.4 0" />
+  </Svg>
+);
+
+const SettingsIcon = () => (
+  <Svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1C2B46" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <Circle cx="12" cy="12" r="3.2" />
+    <Path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.51 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1Z" />
+  </Svg>
+);
+
+const ChevronRight = () => (
+  <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA6BC" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M9 5l7 7-7 7" />
+  </Svg>
+);
+
+const NfcCardIcon = ({ size = 24 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <Rect x="4" y="2.5" width="16" height="19" rx="3" />
+    <Path d="M9.5 9.5a4.2 4.2 0 0 1 5 0" />
+    <Path d="M8 7a7 7 0 0 1 8 0" />
+    <Circle cx="12" cy="13.5" r="1.4" fill="#fff" stroke="none" />
+  </Svg>
+);
+
+const HomeIcon = ({ active }: { active: boolean }) => (
+  <Svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={active ? "#F4531F" : "#9AA6BC"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M3 10.5 12 3l9 7.5" />
+    <Path d="M5 9.5V21h14V9.5" />
+  </Svg>
+);
+
+const RequestsIcon = ({ active }: { active: boolean }) => (
+  <Svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={active ? "#F4531F" : "#9AA6BC"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M4 6h16M4 12h16M4 18h10" />
+  </Svg>
+);
+
+const HistoryIcon = ({ active }: { active: boolean }) => (
+  <Svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={active ? "#F4531F" : "#9AA6BC"} strokeWidth="2" strokeLinecap="round">
+    <Circle cx="12" cy="12" r="9" />
+    <Path d="M12 7v5l3 2" />
+  </Svg>
+);
+
+const ProfileIcon = ({ active }: { active: boolean }) => (
+  <Svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={active ? "#F4531F" : "#9AA6BC"} strokeWidth="2" strokeLinecap="round">
+    <Circle cx="12" cy="8" r="3.6" />
+    <Path d="M5 20a7 7 0 0 1 14 0" />
+  </Svg>
+);
+
+const DriverProfile = ({ navigation }: DriverProfileProps) => {
+  const [notificationsOn, setNotificationsOn] = useState(true);
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.flex}>
+        <MobileStatusBar />
+
+        <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.profileHeader}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>RK</Text>
+            </View>
+            <Text style={styles.name}>Ramesh Kumar</Text>
+            <Text style={styles.subtitle}>VD-0248 · JW Marriott Marquis</Text>
+            <View style={styles.shiftBadge}>
+              <Text style={styles.shiftBadgeText}>● On shift since 08:00 · 7 h 41 m</Text>
+            </View>
+          </View>
+
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>21</Text>
+              <Text style={styles.statLabel}>Orders</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValue, { color: "#0C9D61" }]}>6:40</Text>
+              <Text style={styles.statLabel}>Avg return</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={[styles.statValue, { color: "#F4531F" }]}>0</Text>
+              <Text style={styles.statLabel}>Incidents</Text>
+            </View>
+          </View>
+
+          <View style={styles.settingsMenu}>
+            <TouchableOpacity style={styles.menuItem} activeOpacity={0.7}>
+              <View style={styles.menuItemLeft}>
+                <BuildingIcon />
+                <Text style={styles.menuItemText}>Switch location</Text>
+              </View>
+              <ChevronRight />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              activeOpacity={0.7}
+              onPress={() => setNotificationsOn(!notificationsOn)}
+            >
+              <View style={styles.menuItemLeft}>
+                <BellIcon />
+                <Text style={styles.menuItemText}>Notification sounds</Text>
+              </View>
+              <View style={[styles.toggle, { backgroundColor: notificationsOn ? "#0C9D61" : "#D1D5DB" }]}>
+                <View style={[styles.toggleKnob, notificationsOn ? { alignSelf: "flex-end" } : { alignSelf: "flex-start", marginLeft: 3 }]} />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} activeOpacity={0.7}>
+              <View style={styles.menuItemLeft}>
+                <SettingsIcon />
+                <Text style={styles.menuItemText}>Language · English</Text>
+              </View>
+              <ChevronRight />
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+
+        <View style={styles.bottomSection}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate("DriverLogin")}
+          >
+            <View style={styles.endShiftButton}>
+              <Text style={styles.endShiftButtonText}>End shift & sign out</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.tabBar}>
+          <TouchableOpacity
+            style={styles.tabItem}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("DriverHome")}
+          >
+            <HomeIcon active={false} />
+            <Text style={styles.tabLabel}>Home</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.tabItem}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("DriverPickupRequests")}
+          >
+            <RequestsIcon active={false} />
+            <Text style={styles.tabLabel}>Requests</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.nfcTabButton}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate("DriverNfcTap")}
+          >
+            <NfcCardIcon size={24} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.tabItem}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate("DriverHistory")}
+          >
+            <HistoryIcon active={false} />
+            <Text style={styles.tabLabel}>History</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.tabItem} activeOpacity={0.7}>
+            <ProfileIcon active={true} />
+            <Text style={[styles.tabLabel, styles.tabLabelActive]}>Profile</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#F6F7F9",
+  },
+  flex: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 22,
+    paddingTop: 20,
+    paddingBottom: 14,
+  },
+  profileHeader: {
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingBottom: 4,
+  },
+  avatar: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: "#1C2B46",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: {
+    color: "#FFFFFF",
+    fontSize: 26,
+    fontWeight: "800",
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: "800",
+    marginTop: 12,
+    color: "#1C2B46",
+  },
+  subtitle: {
+    fontSize: 12.5,
+    fontWeight: "600",
+    color: "#6C7A93",
+    marginTop: 2,
+  },
+  shiftBadge: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 99,
+    backgroundColor: "#E7F7EF",
+    marginTop: 10,
+  },
+  shiftBadgeText: {
+    fontSize: 11.5,
+    fontWeight: "800",
+    color: "#0C9D61",
+  },
+  statsGrid: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 20,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E7EAF0",
+    borderRadius: 16,
+    padding: 13,
+    alignItems: "center",
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#1C2B46",
+  },
+  statLabel: {
+    fontSize: 10.5,
+    fontWeight: "600",
+    color: "#6C7A93",
+    marginTop: 2,
+  },
+  settingsMenu: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E7EAF0",
+    borderRadius: 18,
+    marginTop: 16,
+    overflow: "hidden",
+  },
+  menuItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    paddingLeft: 18,
+    paddingRight: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F3F6",
+  },
+  menuItemLeft: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
+  },
+  menuItemText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1C2B46",
+  },
+  toggle: {
+    width: 44,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "#0C9D61",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    paddingRight: 3,
+  },
+  toggleKnob: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+  },
+  bottomSection: {
+    paddingHorizontal: 22,
+    paddingTop: 14,
+    paddingBottom: 10,
+  },
+  endShiftButton: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#F3C9C9",
+    borderRadius: 99,
+    padding: 16,
+    alignItems: "center",
+  },
+  endShiftButtonText: {
+    color: "#E23D3D",
+    fontSize: 15.5,
+    fontWeight: "800",
+  },
+  tabBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#E7EAF0",
+    paddingHorizontal: 30,
+    paddingTop: 12,
+    paddingBottom: 26,
+  },
+  tabItem: {
+    alignItems: "center",
+    gap: 3,
+  },
+  tabLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#9AA6BC",
+  },
+  tabLabelActive: {
+    fontWeight: "800",
+    color: "#F4531F",
+  },
+  nfcTabButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: "#F4531F",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: -30,
+    borderWidth: 4,
+    borderColor: "#F6F7F9",
+    shadowColor: "#F4531F",
+    shadowOpacity: 0.35,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 20,
+    elevation: 8,
+  },
+});
+
+export default DriverProfile;

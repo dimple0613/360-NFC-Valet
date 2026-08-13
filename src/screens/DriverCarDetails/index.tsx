@@ -1,406 +1,328 @@
-import React from "react";
-import { View, ScrollView, Text, Image, TouchableOpacity, } from "react-native";
-import {LinearGradient} from 'expo-linear-gradient';
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import Svg, { Path, Rect, Circle } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { RootStackScreenProps } from "../../navigation";
+import MobileStatusBar from "../../components/ui/StatusBar";
+
 type DriverCarDetailsProps = RootStackScreenProps<"DriverCarDetails">;
-export default (props: DriverCarDetailsProps) => {
-	return (
-		<SafeAreaView
-			style={{
-				flex: 1,
-				backgroundColor: "#FFFFFF",
-			}}>
-			<ScrollView
-				style={{
-					flex: 1,
-					backgroundColor: "#F8FAFC",
-				}}>
-				<View
-					style={{
-						marginBottom: 215,
-					}}>
-					<View
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							alignItems: "center",
-							paddingVertical: 12,
-							paddingHorizontal: 24,
-						}}>
-						<Text
-							style={{
-								color: "#0F172A",
-								fontSize: 14,
-								fontWeight: "bold",
-							}}>
-							{"9:41"}
-						</Text>
-						<View
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-							}}>
-							<Image
-								source={require("../../../assets/status-signal.png")}
-								resizeMode={"stretch"}
-								style={{
-									width: 20,
-									height: 20,
-									marginRight: 8,
-								}}
-							/>
-							<Image
-								source={require("../../../assets/status-wifi.png")}
-								resizeMode={"stretch"}
-								style={{
-									width: 20,
-									height: 20,
-									marginRight: 8,
-								}}
-							/>
-							<Image
-								source={require("../../../assets/status-battery.png")}
-								resizeMode={"stretch"}
-								style={{
-									width: 28,
-									height: 20,
-								}}
-							/>
-						</View>
-					</View>
-					<LinearGradient
-						start={{x:0, y:0}}
-						end={{x:0, y:1}}
-						colors={["#2E0F54", "#0F103F"]}
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							alignItems: "center",
-							borderBottomRightRadius: 24,
-							borderBottomLeftRadius: 24,
-							paddingTop: 20,
-							paddingBottom: 32,
-							paddingHorizontal: 24,
-						}}>
-						<TouchableOpacity onPress={() => props.navigation.goBack()}>
-							<Image
-								source={require("../../../assets/icon-chevron.png")}
-								resizeMode={"stretch"}
-								style={{
-									borderRadius: 18,
-									width: 36,
-									height: 32,
-									tintColor: "#FFFFFF",
-								}}
-							/>
-						</TouchableOpacity>
-						<Text
-							style={{
-								color: "#FFFFFF",
-								fontSize: 18,
-								fontWeight: "bold",
-							}}>
-							{"New Ticket Setup"}
-						</Text>
-						<View
-							style={{
-								backgroundColor: "#10B981",
-								borderRadius: 12,
-								paddingVertical: 3,
-								paddingHorizontal: 10,
-							}}>
-							<Text
-								style={{
-									color: "#FFFFFF",
-									fontSize: 12,
-									fontWeight: "bold",
-								}}>
-								{"Tag Linked"}
-							</Text>
-						</View>
-					</LinearGradient>
-					<View
-						style={{
-							paddingTop: 24,
-							paddingHorizontal: 24,
-						}}>
-						<View
-							style={{
-								backgroundColor: "#FFFFFF",
-								borderColor: "#E2E8F0",
-								borderRadius: 16,
-								borderWidth: 1,
-								paddingVertical: 16,
-								paddingLeft: 16,
-								marginBottom: 20,
-								shadowColor: "#0F172A08",
-								shadowOpacity: 1,
-								shadowOffset: {
-								    width: 0,
-								    height: 4
-								},
-								shadowRadius: 12,
-								elevation: 12,
-							}}>
-							<Text
-								style={{
-									color: "#64748B",
-									fontSize: 12,
-									fontWeight: "bold",
-									marginBottom: 4,
-								}}>
-								{"Linked NFC UID"}
-							</Text>
-							<Text
-								style={{
-									color: "#6C63FF",
-									fontSize: 20,
-									fontWeight: "bold",
-								}}>
-								{"# 9841-A"}
-							</Text>
-						</View>
-						<View
-							style={{
-								marginBottom: 20,
-							}}>
-							<Text
-								style={{
-									color: "#0F172A",
-									fontSize: 13,
-									fontWeight: "bold",
-									marginBottom: 8,
-								}}>
-								{"Plate Number"}
-							</Text>
-							<View
-								style={{
-									flexDirection: "row",
-									justifyContent: "space-between",
-									alignItems: "center",
-									backgroundColor: "#FFFFFF",
-									borderColor: "#E2E8F0",
-									borderRadius: 12,
-									borderWidth: 1,
-									paddingVertical: 9,
-									paddingHorizontal: 16,
-								}}>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 15,
-										fontWeight: "bold",
-									}}>
-									{"KSA-9082"}
-								</Text>
-								<Image
-									source={require("../../../assets/icon-camera.png")}
-									resizeMode={"stretch"}
-									style={{
-										borderRadius: 8,
-										width: 32,
-										height: 32,
-									}}
-								/>
-							</View>
-						</View>
-						<View
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-								marginBottom: 20,
-							}}>
-							<View
-								style={{
-									flex: 1,
-									marginRight: 12,
-								}}>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 13,
-										fontWeight: "bold",
-										marginBottom: 8,
-									}}>
-									{"Make"}
-								</Text>
-								<TouchableOpacity
-									style={{
-										alignSelf: "flex-start",
-										flexDirection: "row",
-										alignItems: "center",
-										backgroundColor: "#FFFFFF",
-										borderColor: "#E2E8F0",
-										borderRadius: 12,
-										borderWidth: 1,
-										padding: 16,
-									}}
-						onPress={() => props.navigation.navigate('DriverUpdateParking')}
-									activeOpacity={0.8}>
-									<Text
-										style={{
-											color: "#0F172A",
-											fontSize: 14,
-											marginRight: 16,
-										}}>
-										{"Mercedes-Benz"}
-									</Text>
-									<Image
-										source={require("../../../assets/icon-chevron-down.png")}
-										resizeMode={"stretch"}
-										style={{
-											borderRadius: 12,
-											width: 14,
-											height: 14,
-										}}
-									/>
-								</TouchableOpacity>
-							</View>
-							<View
-								style={{
-									flex: 1,
-								}}>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 13,
-										fontWeight: "bold",
-										marginBottom: 8,
-									}}>
-									{"Model"}
-								</Text>
-								<View
-									style={{
-										flexDirection: "row",
-										justifyContent: "space-between",
-										alignItems: "center",
-										backgroundColor: "#FFFFFF",
-										borderColor: "#E2E8F0",
-										borderRadius: 12,
-										borderWidth: 1,
-										padding: 16,
-									}}>
-									<Text
-										style={{
-											color: "#0F172A",
-											fontSize: 14,
-										}}>
-										{"S-Class"}
-									</Text>
-									<Image
-										source={require("../../../assets/icon-chevron-down.png")}
-										resizeMode={"stretch"}
-										style={{
-											borderRadius: 12,
-											width: 14,
-											height: 14,
-										}}
-									/>
-								</View>
-							</View>
-						</View>
-						<View>
-							<Text
-								style={{
-									color: "#0F172A",
-									fontSize: 13,
-									fontWeight: "bold",
-									marginBottom: 8,
-								}}>
-								{"Color"}
-							</Text>
-							<View
-								style={{
-									flexDirection: "row",
-									alignItems: "center",
-									backgroundColor: "#FFFFFF",
-									borderColor: "#E2E8F0",
-									borderRadius: 12,
-									borderWidth: 1,
-									paddingVertical: 15,
-									paddingHorizontal: 16,
-								}}>
-								<Image
-									source={require("../../../assets/icon-color.png")}
-									resizeMode={"stretch"}
-									style={{
-										borderRadius: 12,
-										width: 20,
-										height: 20,
-										marginRight: 12,
-									}}
-								/>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 14,
-									}}>
-									{"Obsidian Black Metallic"}
-								</Text>
-								<View
-									style={{
-										flex: 1,
-									}}>
-								</View>
-								<Image
-									source={require("../../../assets/icon-chevron-down.png")}
-									resizeMode={"stretch"}
-									style={{
-										borderRadius: 12,
-										width: 14,
-										height: 14,
-									}}
-								/>
-							</View>
-						</View>
-					</View>
-				</View>
-				<View
-					style={{
-						paddingBottom: 16,
-						paddingHorizontal: 24,
-					}}>
-					<TouchableOpacity
-						onPress={() => props.navigation.navigate('DriverCardActivated')}
-						activeOpacity={0.8}>
-						<LinearGradient
-							start={{x:0, y:0.5}}
-							end={{x:1, y:0.5}}
-							colors={["#5B5BFF", "#8B5CF6"]}
-							style={{
-								alignItems: "center",
-								borderRadius: 27,
-								paddingVertical: 17,
-								marginBottom: 16,
-							}}>
-							<Text
-								style={{
-									color: "#FFFFFF",
-									fontSize: 16,
-									fontWeight: "bold",
-								}}>
-								{"Validate & Assign Card"}
-							</Text>
-						</LinearGradient>
-					</TouchableOpacity>
-					<View
-						style={{
-							alignItems: "center",
-							paddingTop: 21,
-						}}>
-						<View
-							style={{
-								width: 139,
-								height: 5,
-								backgroundColor: "#0F172A",
-								borderRadius: 100,
-								marginBottom: 8,
-							}}>
-						</View>
-					</View>
-				</View>
-			</ScrollView>
-		</SafeAreaView>
-	)
-}
+
+const BackIcon = () => (
+  <Svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C2B46" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M15 5l-7 7 7 7" />
+  </Svg>
+);
+
+const SmallNfcIcon = () => (
+  <Svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#FF8A50" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <Rect x="4" y="2.5" width="16" height="19" rx="3" />
+    <Path d="M9.5 9.5a4.2 4.2 0 0 1 5 0" />
+    <Path d="M8 7a7 7 0 0 1 8 0" />
+    <Circle cx="12" cy="13.5" r="1.4" fill="#FF8A50" stroke="none" />
+  </Svg>
+);
+
+const PlateCameraIcon = () => (
+  <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F4531F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" />
+    <Circle cx="12" cy="13.5" r="3.4" />
+  </Svg>
+);
+
+const COLORS = [
+  { id: "1", bg: "#16181C" },
+  { id: "2", bg: "#FFFFFF", border: "#E7EAF0" },
+  { id: "3", bg: "#C7CCD6" },
+  { id: "4", bg: "#7A8699" },
+];
+
+const DriverCarDetails = ({ navigation }: DriverCarDetailsProps) => {
+  const [selectedColor, setSelectedColor] = useState("1");
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.flex}>
+        <MobileStatusBar />
+
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            activeOpacity={0.7}
+            onPress={() => navigation.goBack()}
+          >
+            <BackIcon />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Car details</Text>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>Card read ✓</Text>
+          </View>
+        </View>
+
+        <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.uidCard}>
+            <View>
+              <Text style={styles.uidLabel}>CARD UID — PRINTED ON CARD</Text>
+              <View style={styles.uidDigits}>
+                <View style={styles.digitBox}>
+                  <Text style={styles.digitText}>7</Text>
+                </View>
+                <View style={styles.digitBox}>
+                  <Text style={styles.digitText}>2</Text>
+                </View>
+                <View style={styles.digitBox}>
+                  <Text style={styles.digitText}>0</Text>
+                </View>
+                <View style={[styles.digitBox, styles.digitBoxActive]}>
+                  <Text style={styles.digitText}>4</Text>
+                </View>
+              </View>
+            </View>
+            <SmallNfcIcon />
+          </View>
+
+          <View style={styles.plateCard}>
+            <View>
+              <Text style={styles.plateLabel}>PLATE NUMBER</Text>
+              <Text style={styles.plateText}>DXB · J 5580</Text>
+            </View>
+            <View style={styles.plateIconTile}>
+              <PlateCameraIcon />
+            </View>
+          </View>
+
+          <Text style={styles.hintText}>Or snap the plate — we read it for you.</Text>
+
+          <View style={styles.makeModelGrid}>
+            <View style={styles.makeModelCard}>
+              <Text style={styles.fieldLabel}>MAKE</Text>
+              <Text style={styles.fieldValue}>Mercedes</Text>
+            </View>
+            <View style={styles.makeModelCard}>
+              <Text style={styles.fieldLabel}>MODEL</Text>
+              <Text style={styles.fieldValue}>G63 AMG</Text>
+            </View>
+          </View>
+
+          <View style={styles.colorCard}>
+            <Text style={styles.fieldLabel}>COLOR</Text>
+            <View style={styles.colorSwatches}>
+              {COLORS.map((color) => (
+                <TouchableOpacity
+                  key={color.id}
+                  onPress={() => setSelectedColor(color.id)}
+                  activeOpacity={0.7}
+                >
+                  <View
+                    style={[
+                      styles.colorSwatch,
+                      { backgroundColor: color.bg },
+                      color.border ? { borderWidth: 1.5, borderColor: color.border } : { borderWidth: 3, borderColor: "#E7EAF0" },
+                      selectedColor === color.id && { borderColor: "#F4531F", borderWidth: 3 },
+                    ]}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate("DriverCardActivated")}
+          >
+            <View style={styles.nextButton}>
+              <Text style={styles.nextButtonText}>Confirm & park</Text>
+            </View>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#F6F7F9",
+  },
+  flex: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 22,
+    paddingTop: 12,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#E7EAF0",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#1C2B46",
+  },
+  badge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 99,
+    backgroundColor: "#E7F7EF",
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#0C9D61",
+  },
+  scrollContent: {
+    paddingHorizontal: 22,
+    paddingTop: 16,
+    paddingBottom: 24,
+    gap: 12,
+  },
+  uidCard: {
+    backgroundColor: "#1C2B46",
+    borderRadius: 18,
+    padding: 15,
+    paddingRight: 18,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  uidLabel: {
+    fontSize: 10.5,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+    color: "#9FB0CC",
+    textTransform: "uppercase",
+  },
+  uidDigits: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  digitBox: {
+    width: 40,
+    height: 48,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.25)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  digitBoxActive: {
+    borderWidth: 2,
+    borderColor: "#F4531F",
+  },
+  digitText: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#FFFFFF",
+  },
+  plateCard: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#E7EAF0",
+    borderRadius: 16,
+    padding: 13,
+    paddingRight: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  plateLabel: {
+    fontSize: 10.5,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+    color: "#6C7A93",
+    textTransform: "uppercase",
+  },
+  plateText: {
+    fontSize: 19,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+    marginTop: 3,
+    color: "#1C2B46",
+  },
+  plateIconTile: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#FEEFE8",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  hintText: {
+    fontSize: 11,
+    color: "#6C7A93",
+    fontWeight: "600",
+    marginTop: -6,
+    paddingLeft: 4,
+  },
+  makeModelGrid: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  makeModelCard: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#E7EAF0",
+    borderRadius: 16,
+    padding: 13,
+    paddingLeft: 16,
+  },
+  fieldLabel: {
+    fontSize: 10.5,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+    color: "#6C7A93",
+    textTransform: "uppercase",
+  },
+  fieldValue: {
+    fontSize: 15,
+    fontWeight: "700",
+    marginTop: 3,
+    color: "#1C2B46",
+  },
+  colorCard: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#E7EAF0",
+    borderRadius: 16,
+    padding: 13,
+    paddingLeft: 16,
+  },
+  colorSwatches: {
+    flexDirection: "row",
+    gap: 9,
+    marginTop: 9,
+    alignItems: "center",
+  },
+  colorSwatch: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+  },
+  nextButton: {
+    backgroundColor: "#F4531F",
+    borderRadius: 99,
+    padding: 16,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  nextButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+});
+
+export default DriverCarDetails;

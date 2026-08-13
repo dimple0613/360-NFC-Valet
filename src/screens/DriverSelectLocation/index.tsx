@@ -1,484 +1,244 @@
-import React, {useState} from "react";
-import { View, ScrollView, Text, Image, TextInput, TouchableOpacity, } from "react-native";
-import {LinearGradient} from 'expo-linear-gradient';
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import Svg, { Path, Rect } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { RootStackScreenProps } from "../../navigation";
+import MobileStatusBar from "../../components/ui/StatusBar";
+
 type DriverSelectLocationProps = RootStackScreenProps<"DriverSelectLocation">;
-export default (props: DriverSelectLocationProps) => {
-	const [textInput1, onChangeTextInput1] = useState('');
-	return (
-		<SafeAreaView
-			style={{
-				flex: 1,
-				backgroundColor: "#FFFFFF",
-			}}>
-			<ScrollView
-				style={{
-					flex: 1,
-					backgroundColor: "#F8FAFC",
-				}}>
-				<View
-					style={{
-						marginBottom: 113,
-					}}>
-					<View
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							alignItems: "center",
-							paddingVertical: 12,
-							paddingHorizontal: 24,
-						}}>
-						<Text
-							style={{
-								color: "#0F172A",
-								fontSize: 14,
-								fontWeight: "bold",
-							}}>
-							{"9:41"}
-						</Text>
-						<View
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-							}}>
-							<Image
-								source={require("../../../assets/status-signal.png")}
-								resizeMode={"stretch"}
-								style={{
-									width: 20,
-									height: 20,
-									marginRight: 8,
-								}}
-							/>
-							<Image
-								source={require("../../../assets/status-wifi.png")}
-								resizeMode={"stretch"}
-								style={{
-									width: 20,
-									height: 20,
-									marginRight: 8,
-								}}
-							/>
-							<Image
-								source={require("../../../assets/status-battery.png")}
-								resizeMode={"stretch"}
-								style={{
-									width: 28,
-									height: 20,
-								}}
-							/>
-						</View>
-					</View>
-					<View
-						style={{
-							flexDirection: "row",
-							alignItems: "center",
-							paddingVertical: 16,
-							paddingHorizontal: 24,
-						}}>
-						<View
-							style={{
-								flex: 1,
-							}}>
-							<Text
-								style={{
-									color: "#64748B",
-									fontSize: 14,
-									marginBottom: 2,
-								}}>
-								{"Welcome back,"}
-							</Text>
-							<Text
-								style={{
-									color: "#0F172A",
-									fontSize: 22,
-									fontWeight: "bold",
-								}}>
-								{"Ahmed Al-Sabah"}
-							</Text>
-						</View>
-						<Image
-							source={require("../../../assets/logo.png")}
-							resizeMode={"stretch"}
-							style={{
-								borderRadius: 24,
-								width: 48,
-								height: 48,
-							}}
-						/>
-					</View>
-					<View
-						style={{
-							paddingVertical: 16,
-							paddingRight: 24,
-						}}>
-						<View
-							style={{
-								marginBottom: 4,
-								marginLeft: 24,
-							}}>
-							<Text
-								style={{
-									color: "#0F172A",
-									fontSize: 22,
-									fontWeight: "bold",
-								}}>
-								{"Select Location"}
-							</Text>
-						</View>
-						<Text
-							style={{
-								color: "#64748B",
-								fontSize: 14,
-								marginLeft: 24,
-							}}>
-							{"Confirm your venue for today's shift"}
-						</Text>
-					</View>
-					<View
-						style={{
-							flexDirection: "row",
-							alignItems: "center",
-							backgroundColor: "#FFFFFF",
-							borderColor: "#E2E8F0",
-							borderRadius: 24,
-							borderWidth: 1,
-							marginBottom: 16,
-							marginHorizontal: 24,
-						}}>
-						<Image
-							source={require("../../../assets/icon-email.png")}
-							resizeMode={"stretch"}
-							style={{
-								borderRadius: 24,
-								width: 18,
-								height: 18,
-								marginLeft: 16,
-								marginRight: 12,
-							}}
-						/>
-						<TextInput
-							placeholder={"Search hotel or center name..."}
-							placeholderTextColor="#64748B"
-							value={textInput1}
-							onChangeText={onChangeTextInput1}
-							style={{
-								color: "#0F172A",
-								fontSize: 14,
-								marginRight: 4,
-								flex: 1,
-								paddingVertical: 15,
-							}}
-						/>
-					</View>
-					<View
-						style={{
-							paddingHorizontal: 24,
-						}}>
-						<View
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-								backgroundColor: "#FFFFFF",
-								borderColor: "#6C63FF",
-								borderRadius: 16,
-								borderWidth: 2,
-								padding: 16,
-								marginBottom: 12,
-								shadowColor: "#0F172A08",
-								shadowOpacity: 1,
-								shadowOffset: {
-								    width: 0,
-								    height: 4
-								},
-								shadowRadius: 12,
-								elevation: 12,
-							}}>
-							<View
-								style={{
-									borderRadius: 12,
-									width: 44,
-									height: 44,
-									marginRight: 16,
-									backgroundColor: "#6C63FF20",
-									alignItems: "center",
-									justifyContent: "center",
-								}}>
-								<Image
-									source={require("../../../assets/icon-lock.png")}
-									resizeMode={"stretch"}
-									style={{
-										width: 20,
-										height: 20,
-									}}
-								/>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									marginRight: 16,
-								}}>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 16,
-										fontWeight: "bold",
-										marginBottom: 2,
-									}}>
-									{"The Ritz-Carlton Regent"}
-								</Text>
-								<Text
-									style={{
-										color: "#64748B",
-										fontSize: 12,
-									}}>
-									{"100 Ritz-Carlton Dr"}
-								</Text>
-							</View>
-							<View
-								style={{
-									width: 24,
-									height: 24,
-									borderRadius: 12,
-									borderColor: "#6C63FF",
-									backgroundColor: "#6C63FF",
-									alignItems: "center",
-									justifyContent: "center",
-								}}>
-								<Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "bold" }}>{"✓"}</Text>
-							</View>
-						</View>
-						<View
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-								backgroundColor: "#FFFFFF",
-								borderColor: "#E2E8F0",
-								borderRadius: 16,
-								borderWidth: 1,
-								padding: 16,
-								marginBottom: 12,
-								shadowColor: "#0F172A08",
-								shadowOpacity: 1,
-								shadowOffset: {
-								    width: 0,
-								    height: 4
-								},
-								shadowRadius: 12,
-								elevation: 12,
-							}}>
-							<View
-								style={{
-									borderRadius: 12,
-									width: 44,
-									height: 44,
-									marginRight: 16,
-									backgroundColor: "#F1F5F9",
-									alignItems: "center",
-									justifyContent: "center",
-								}}>
-								<Image
-									source={require("../../../assets/icon-eye.png")}
-									resizeMode={"stretch"}
-									style={{
-										width: 20,
-										height: 20,
-									}}
-								/>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									marginRight: 16,
-								}}>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 16,
-										fontWeight: "bold",
-										marginBottom: 2,
-									}}>
-									{"Four Seasons Waterfront"}
-								</Text>
-								<Text
-									style={{
-										color: "#64748B",
-										fontSize: 12,
-									}}>
-									{"250 Ocean Boulevard"}
-								</Text>
-							</View>
-						</View>
-						<View
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-								backgroundColor: "#FFFFFF",
-								borderColor: "#E2E8F0",
-								borderRadius: 16,
-								borderWidth: 1,
-								padding: 16,
-								marginBottom: 12,
-								shadowColor: "#0F172A08",
-								shadowOpacity: 1,
-								shadowOffset: {
-								    width: 0,
-								    height: 4
-								},
-								shadowRadius: 12,
-								elevation: 12,
-							}}>
-							<View
-								style={{
-									borderRadius: 12,
-									width: 44,
-									height: 44,
-									marginRight: 16,
-									backgroundColor: "#F1F5F9",
-									alignItems: "center",
-									justifyContent: "center",
-								}}>
-								<Image
-									source={require("../../../assets/icon-lock.png")}
-									resizeMode={"stretch"}
-									style={{
-										width: 20,
-										height: 20,
-									}}
-								/>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									marginRight: 16,
-								}}>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 16,
-										fontWeight: "bold",
-										marginBottom: 2,
-										width: 138,
-									}}>
-									{"Mandarin Oriental Center"}
-								</Text>
-								<Text
-									style={{
-										color: "#64748B",
-										fontSize: 12,
-									}}>
-									{"75 Mandarin Way"}
-								</Text>
-							</View>
-						</View>
-						<View
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-								backgroundColor: "#FFFFFF",
-								borderColor: "#E2E8F0",
-								borderRadius: 16,
-								borderWidth: 1,
-								padding: 16,
-								shadowColor: "#0F172A08",
-								shadowOpacity: 1,
-								shadowOffset: {
-								    width: 0,
-								    height: 4
-								},
-								shadowRadius: 12,
-								elevation: 12,
-							}}>
-							<View
-								style={{
-									borderRadius: 12,
-									width: 44,
-									height: 44,
-									marginRight: 16,
-									backgroundColor: "#F1F5F9",
-									alignItems: "center",
-									justifyContent: "center",
-								}}>
-								<Image
-									source={require("../../../assets/icon-eye.png")}
-									resizeMode={"stretch"}
-									style={{
-										width: 20,
-										height: 20,
-									}}
-								/>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									marginRight: 16,
-								}}>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 16,
-										fontWeight: "bold",
-										marginBottom: 2,
-									}}>
-									{"Rosewood Mansion"}
-								</Text>
-								<Text
-									style={{
-										color: "#64748B",
-										fontSize: 12,
-									}}>
-									{"12 Suite Avenue"}
-								</Text>
-							</View>
-						</View>
-					</View>
-				</View>
-				<View
-					style={{
-						paddingBottom: 16,
-						paddingHorizontal: 24,
-					}}>
-					<TouchableOpacity
-						onPress={() => props.navigation.navigate('DriverNfcTap')}
-						activeOpacity={0.8}>
-						<LinearGradient
-							start={{x:0, y:0.5}}
-							end={{x:1, y:0.5}}
-							colors={["#5B5BFF", "#8B5CF6"]}
-							style={{
-								alignItems: "center",
-								borderRadius: 27,
-								paddingVertical: 17,
-								marginBottom: 16,
-							}}>
-							<Text
-								style={{
-									color: "#FFFFFF",
-									fontSize: 16,
-									fontWeight: "bold",
-								}}>
-								{"Confirm & Start Shift"}
-							</Text>
-						</LinearGradient>
-					</TouchableOpacity>
-					<View
-						style={{
-							alignItems: "center",
-							paddingTop: 21,
-						}}>
-						<View
-							style={{
-								width: 139,
-								height: 5,
-								backgroundColor: "#0F172A",
-								borderRadius: 100,
-								marginBottom: 8,
-							}}>
-						</View>
-					</View>
-				</View>
-			</ScrollView>
-		</SafeAreaView>
-	)
-}
+
+type Location = {
+  id: string;
+  name: string;
+  area: string;
+  drivers: number;
+};
+
+const locations: Location[] = [
+  { id: "1", name: "JW Marriott Marquis", area: "Business Bay", drivers: 6 },
+  { id: "2", name: "Address Downtown", area: "Downtown Dubai", drivers: 4 },
+  { id: "3", name: "Atlantis The Royal", area: "Palm Jumeirah", drivers: 8 },
+];
+
+const BuildingIcon = ({ color }: { color: string }) => (
+  <Svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <Path d="M3 21h18" />
+    <Path d="M5 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16" />
+    <Path d="M15 9h4v12" />
+    <Path d="M8 8h1M8 12h1M11 8h1M11 12h1" />
+  </Svg>
+);
+
+const CheckIcon = () => (
+  <Svg
+    width="13"
+    height="13"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#FFFFFF"
+    strokeWidth="3.4"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <Path d="M4 12.5 9.5 18 20 6.5" />
+  </Svg>
+);
+
+const DriverSelectLocation = ({ navigation }: DriverSelectLocationProps) => {
+  const [selectedId, setSelectedId] = useState("1");
+
+  const selectedLocation = locations.find((l) => l.id === selectedId);
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.flex}>
+        <MobileStatusBar />
+
+        <View style={styles.content}>
+          <Text style={styles.greeting}>Good morning, Ramesh 👋</Text>
+          <Text style={styles.title}>Where are you working today?</Text>
+
+          <View style={styles.locationList}>
+            {locations.map((location) => {
+              const isSelected = location.id === selectedId;
+              return (
+                <TouchableOpacity
+                  key={location.id}
+                  onPress={() => setSelectedId(location.id)}
+                  activeOpacity={0.8}
+                  style={[
+                    styles.locationCard,
+                    isSelected && styles.locationCardSelected,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.locationIcon,
+                      isSelected && styles.locationIconSelected,
+                    ]}
+                  >
+                    <BuildingIcon color={isSelected ? "#F4531F" : "#6C7A93"} />
+                  </View>
+
+                  <View style={styles.locationInfo}>
+                    <Text style={styles.locationName}>{location.name}</Text>
+                    <Text style={styles.locationArea}>
+                      {location.area} · {location.drivers} drivers on shift
+                    </Text>
+                  </View>
+
+                  {isSelected ? (
+                    <View style={styles.radioSelected}>
+                      <CheckIcon />
+                    </View>
+                  ) : (
+                    <View style={styles.radioUnselected} />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          <View style={styles.footer}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("DriverHome")}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                colors={["#F4531F", "#FF8A50"]}
+                style={styles.startButton}
+              >
+                <Text style={styles.startButtonText}>
+                  Start my day at {selectedLocation?.name.split(" ")[0]}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#F6F7F9",
+  },
+  flex: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 26,
+    paddingBottom: 34,
+  },
+  greeting: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#6C7A93",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#1C2B46",
+    letterSpacing: -0.4,
+    marginTop: 4,
+  },
+  locationList: {
+    marginTop: 24,
+    gap: 12,
+  },
+  locationCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#E7EAF0",
+    borderRadius: 18,
+    padding: 16,
+    gap: 14,
+  },
+  locationCardSelected: {
+    borderWidth: 2,
+    borderColor: "#F4531F",
+    shadowColor: "#F4531F",
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 20,
+    elevation: 6,
+  },
+  locationIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: "#F6F7F9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  locationIconSelected: {
+    backgroundColor: "#FEEFE8",
+  },
+  locationInfo: {
+    flex: 1,
+  },
+  locationName: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#1C2B46",
+  },
+  locationArea: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#6C7A93",
+    marginTop: 2,
+  },
+  radioSelected: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#F4531F",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioUnselected: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#E7EAF0",
+  },
+  footer: {
+    marginTop: "auto",
+  },
+  startButton: {
+    alignItems: "center",
+    borderRadius: 99,
+    paddingVertical: 17,
+    shadowColor: "#F4531F",
+    shadowOpacity: 0.32,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 22,
+    elevation: 6,
+  },
+  startButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "800",
+  },
+});
+
+export default DriverSelectLocation;

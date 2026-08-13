@@ -1,267 +1,255 @@
 import React, { useState } from "react";
-import { View, Image, Text, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
+import Svg, { Rect, Path, Circle } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import type { RootStackScreenProps } from "../../navigation";
-import { Colors, Typography } from "../../constants";
+import MobileStatusBar from "../../components/ui/StatusBar";
 
 type DriverLoginProps = RootStackScreenProps<"DriverLogin">;
 
-const inputContainerStyle = {
-	flexDirection: "row" as const,
-	alignItems: "center" as const,
-	backgroundColor: Colors.surface,
-	borderColor: Colors.border,
-	borderRadius: 27,
-	borderWidth: 1,
-	height: 54,
-	paddingLeft: 20,
-	paddingRight: 20,
-	gap: 12,
+const DriverLogin = ({ navigation }: DriverLoginProps) => {
+  const [driverId, setDriverId] = useState("VD-0248");
+  const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          style={styles.flex}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <MobileStatusBar />
+
+          <View style={styles.content}>
+            <LinearGradient
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              colors={["#F4531F", "#FF8A50"]}
+              style={styles.logo}
+            >
+              <Svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#FFFFFF"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <Path d="M6 8a7 7 0 0 1 0 8" />
+                <Path d="M9.5 5.5a11 11 0 0 1 0 13" />
+                <Path d="M13 3a15 15 0 0 1 0 18" />
+              </Svg>
+            </LinearGradient>
+
+            <Text style={styles.title}>360 NFC Valet</Text>
+            <Text style={styles.subtitle}>
+              Driver console. Sign in to start your shift.
+            </Text>
+
+            <View style={styles.form}>
+              <View style={styles.inputField}>
+                <Text style={styles.inputLabel}>Driver ID</Text>
+                <Text style={styles.inputValue}>{driverId}</Text>
+              </View>
+
+              <View style={styles.inputFieldRow}>
+                <View style={styles.inputFieldLeft}>
+                  <Text style={styles.inputLabel}>Password</Text>
+                  <Text style={styles.passwordValue}>
+                    {passwordVisible ? password || "••••••••" : "••••••••"}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setPasswordVisible(!passwordVisible)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#6C7A93"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <Path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z" />
+                    <Circle cx="12" cy="12" r="2.6" />
+                  </Svg>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.forgotPassword} activeOpacity={0.7}>
+              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.footer}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("DriverSelectLocation")}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                colors={["#F4531F", "#FF8A50"]}
+                style={styles.signInButton}
+              >
+                <Text style={styles.signInText}>Sign in</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <Text style={styles.footerNote}>
+              Accounts are created by your admin — no self sign-up.
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 };
 
-const inputTextStyle = {
-	flex: 1,
-	color: Colors.text.primary,
-	fontSize: Typography.size.md,
-	fontWeight: Typography.weight.regular,
-};
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  flex: {
+    flex: 1,
+  },
+  scrollContent: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 30,
+    paddingTop: 40,
+    paddingBottom: 34,
+  },
+  logo: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#F4531F",
+    shadowOpacity: 0.32,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1C2B46",
+    letterSpacing: -0.5,
+    marginTop: 26,
+    lineHeight: 34,
+  },
+  subtitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6C7A93",
+    marginTop: 6,
+  },
+  form: {
+    marginTop: 34,
+    gap: 14,
+  },
+  inputField: {
+    backgroundColor: "#F6F7F9",
+    borderWidth: 1.5,
+    borderColor: "#E7EAF0",
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 13,
+  },
+  inputLabel: {
+    fontSize: 10.5,
+    fontWeight: "800",
+    color: "#6C7A93",
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
+  },
+  inputValue: {
+    fontSize: 15.5,
+    fontWeight: "700",
+    color: "#1C2B46",
+    marginTop: 2,
+  },
+  inputFieldRow: {
+    backgroundColor: "#F6F7F9",
+    borderWidth: 1.5,
+    borderColor: "#E7EAF0",
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 13,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  inputFieldLeft: {
+    flex: 1,
+  },
+  passwordValue: {
+    fontSize: 15.5,
+    fontWeight: "700",
+    color: "#1C2B46",
+    marginTop: 2,
+    letterSpacing: 3,
+  },
+  forgotPassword: {
+    alignItems: "flex-end",
+    marginTop: 14,
+  },
+  forgotPasswordText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#F4531F",
+  },
+  footer: {
+    paddingHorizontal: 30,
+    paddingBottom: 34,
+  },
+  signInButton: {
+    alignItems: "center",
+    borderRadius: 99,
+    paddingVertical: 17,
+    shadowColor: "#F4531F",
+    shadowOpacity: 0.32,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 22,
+    elevation: 6,
+  },
+  signInText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  footerNote: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "#6C7A93",
+    textAlign: "center",
+    marginTop: 14,
+  },
+});
 
-const statusIconStyle = {
-	width: 20,
-	height: 20,
-	marginRight: 8,
-};
-
-export default (props: DriverLoginProps) => {
-	const [identifier, setIdentifier] = useState("");
-	const [password, setPassword] = useState("");
-	const [passwordVisible, setPasswordVisible] = useState(false);
-
-	return (
-		<LinearGradient
-			colors={["#2E0F54", "#0F103F"]}
-			style={{
-				flex: 1,
-			}}>
-			<SafeAreaView
-				style={{
-					flex: 1,
-				}}>
-				<View
-					style={{
-						flex: 1,
-						justifyContent: "space-between",
-					}}>
-					<View>
-						<View
-							style={{
-								flexDirection: "row",
-								justifyContent: "space-between",
-								alignItems: "center",
-								paddingVertical: 12,
-								paddingHorizontal: 24,
-							}}>
-							<Text
-								style={{
-									color: Colors.text.primary,
-									fontSize: Typography.size.sm,
-									fontWeight: Typography.weight.semibold,
-								}}>
-								{"9:41"}
-							</Text>
-							<View
-								style={{
-									flexDirection: "row",
-									alignItems: "center",
-								}}>
-								<Image
-									source={require("../../../assets/status-signal.png")}
-									resizeMode={"stretch"}
-									style={statusIconStyle}
-								/>
-								<Image
-									source={require("../../../assets/status-wifi.png")}
-									resizeMode={"stretch"}
-									style={statusIconStyle}
-								/>
-								<Image
-									source={require("../../../assets/status-battery.png")}
-									resizeMode={"stretch"}
-									style={{
-										width: 28,
-										height: 20,
-									}}
-								/>
-							</View>
-						</View>
-						<View
-							style={{
-								alignItems: "center",
-								paddingTop: 80,
-								paddingBottom: 48,
-							}}>
-							<LinearGradient
-								start={{ x: 0, y: 0.5 }}
-								end={{ x: 1, y: 0.5 }}
-								colors={[Colors.primary, Colors.secondary]}
-								style={{
-									width: 80,
-									height: 80,
-									borderRadius: 40,
-									alignItems: "center",
-									justifyContent: "center",
-									shadowColor: Colors.primary,
-									shadowOpacity: 0.25,
-									shadowOffset: { width: 0, height: 8 },
-									shadowRadius: 16,
-									elevation: 6,
-								}}>
-								<View
-									style={{
-										width: 30,
-										height: 30,
-										borderWidth: 2,
-										borderColor: Colors.text.primary,
-									}}
-								/>
-							</LinearGradient>
-							<View
-								style={{
-									alignItems: "center",
-									marginTop: 16,
-								}}>
-								<Text
-									style={{
-										color: Colors.text.primary,
-										fontSize: Typography.size.xxl,
-										fontWeight: Typography.weight.black,
-									}}>
-									{"360 NFC Valet"}
-								</Text>
-								<Text
-									style={{
-										color: Colors.text.primary,
-										fontSize: Typography.size.xs,
-										fontWeight: Typography.weight.semibold,
-										opacity: 0.6,
-										textTransform: "uppercase",
-										marginTop: 4,
-									}}>
-									{"Premium Hospitality"}
-								</Text>
-							</View>
-						</View>
-						<View
-							style={{
-								paddingHorizontal: 32,
-								gap: 16,
-							}}>
-							<View style={inputContainerStyle}>
-								<Ionicons
-									name="person-outline"
-									size={20}
-									color={Colors.text.primary}
-									style={{ opacity: 0.7 }}
-								/>
-								<TextInput
-									placeholder={"Valet ID or Email"}
-									placeholderTextColor={"rgba(255, 255, 255, 0.5)"}
-									value={identifier}
-									onChangeText={setIdentifier}
-									style={inputTextStyle}
-								/>
-							</View>
-							<View style={inputContainerStyle}>
-								<Ionicons
-									name="lock-closed-outline"
-									size={20}
-									color={Colors.text.primary}
-									style={{ opacity: 0.7 }}
-								/>
-								<TextInput
-									placeholder={"Password"}
-									placeholderTextColor={"rgba(255, 255, 255, 0.5)"}
-									value={password}
-									onChangeText={setPassword}
-									secureTextEntry={!passwordVisible}
-									style={inputTextStyle}
-								/>
-								<TouchableOpacity
-									onPress={() => setPasswordVisible((v) => !v)}
-									activeOpacity={0.8}>
-									<Ionicons
-										name={passwordVisible ? "eye-outline" : "eye-off-outline"}
-										size={20}
-										color={Colors.text.primary}
-										style={{ opacity: 0.7 }}
-									/>
-								</TouchableOpacity>
-							</View>
-							<TouchableOpacity
-								onPress={() => props.navigation.navigate("DriverSelectLocation")}
-								activeOpacity={0.8}>
-								<LinearGradient
-									start={{ x: 0, y: 0.5 }}
-									end={{ x: 1, y: 0.5 }}
-									colors={[Colors.primary, Colors.secondary]}
-									style={{
-										height: 54,
-										borderRadius: 27,
-										alignItems: "center",
-										justifyContent: "center",
-										shadowColor: Colors.primary,
-										shadowOpacity: 0.37,
-										shadowOffset: { width: 0, height: 8 },
-										shadowRadius: 20,
-										elevation: 6,
-									}}>
-									<Text
-										style={{
-											color: Colors.text.primary,
-											fontSize: Typography.size.lg,
-											fontWeight: Typography.weight.bold,
-										}}>
-										{"Log In to Shift"}
-									</Text>
-								</LinearGradient>
-							</TouchableOpacity>
-							<View
-								style={{
-									alignItems: "center",
-									paddingTop: 8,
-								}}>
-								<Text
-									style={{
-										color: Colors.text.primary,
-										opacity: 0.8,
-										fontSize: Typography.size.sm,
-										fontWeight: Typography.weight.medium,
-										textDecorationLine: "underline",
-									}}>
-									{"Forgot Password?"}
-								</Text>
-							</View>
-						</View>
-					</View>
-					<View
-						style={{
-							alignItems: "center",
-							paddingTop: 21,
-							paddingBottom: 8,
-						}}>
-						<View
-							style={{
-								width: 139,
-								height: 5,
-								backgroundColor: Colors.text.primary,
-								borderRadius: 100,
-							}}
-						/>
-					</View>
-				</View>
-			</SafeAreaView>
-		</LinearGradient>
-	);
-};
+export default DriverLogin;
