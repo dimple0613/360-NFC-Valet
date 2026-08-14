@@ -5,9 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#6C63FF"
+    },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -18,9 +20,6 @@
       "package": "com.valet.threesixtynfc"
     },
     "web": {},
-    "plugins": [
-      "expo-font",
-      "expo-status-bar"
-    ]
+    "newArchEnabled": false
   }
 }
