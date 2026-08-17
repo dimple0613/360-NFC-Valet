@@ -4,6 +4,7 @@ module.exports = function fontAliasPlugin({ types: t }) {
   return {
     visitor: {
       ImportDeclaration(path) {
+        if (path.hub?.file?.opts?.filename?.includes("node_modules")) return;
         const source = path.node.source.value;
         if (source !== "react-native") return;
 
