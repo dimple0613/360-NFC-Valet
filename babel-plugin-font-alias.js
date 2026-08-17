@@ -1,9 +1,15 @@
+const pathModule = require("path");
+const srcDir = pathModule.resolve(__dirname, "src").replace(/\\/g, "/");
+
 module.exports = function fontAliasPlugin({ types: t }) {
   const FONT_IMPORT = "@/theme";
 
   return {
     visitor: {
       ImportDeclaration(path) {
+        const filename = (path.hub?.file?.opts?.filename ?? "").replace(/\\/g, "/");
+        if (!filename.startsWith(srcDir)) return;
+
         const source = path.node.source.value;
         if (source !== "react-native") return;
 
