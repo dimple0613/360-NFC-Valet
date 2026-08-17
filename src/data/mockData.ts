@@ -1,11 +1,17 @@
-import { User } from "../types";
+import type { Driver } from "../types";
 
-export const MOCK_DRIVER: User = {
-  id: "DRV-001",
+export const MOCK_DRIVER: Driver = {
+  id: 1,
   valetId: "VA-2048",
-  email: "ramesh.k@360valet.com",
   fullName: "Ramesh K.",
-  role: "driver",
+  initials: "RK",
+  avatarColor: "#1C2B46",
+  email: "ramesh.k@360valet.com",
+  phone: null,
+  status: "on_shift",
+  propertyId: 1,
+  propertyName: "JW Marriott Marquis",
+  shiftStartedAt: null,
 };
 
 export const MOCK_LOCATION = {

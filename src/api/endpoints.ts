@@ -1,11 +1,18 @@
 export const ApiEndpoints = {
   auth: {
-    login: "/auth/login",
+    driverLogin: "/auth/driver-login",
+    driverForgotPassword: "/auth/driver/forgot-password",
+    driverResetPassword: "/auth/driver/reset-password",
     logout: "/auth/logout",
-    refresh: "/auth/refresh",
   },
-  valet: {
-    shift: "/valet/shift",
-    vehicles: "/valet/vehicles",
+  driver: {
+    dashboard: "/driver/dashboard",
+    queue: "/driver/queue",
+    shift: "/driver/shift",
+    orders: "/driver/orders",
+    orderStatus: (id: number) => `/driver/orders/${id}`,
+    properties: "/driver/properties",
+    history: "/driver/history",
+    profile: "/driver/profile",
   },
 } as const;

@@ -1,12 +1,17 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-import Svg, { Path, Rect, Circle } from "react-native-svg";
+import React, { useCallback } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import Svg, { Path, Circle } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../context/AuthContext";
+import { http } from "../../api/client";
+import { ApiEndpoints } from "../../api/endpoints";
+import { useAsyncData } from "../../hooks/useAsyncData";
+import type { DashboardStats, QueueItem } from "../../types";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
 
-type DriverHomeProps = RootStackScreenProps<"DriverHome">;
+type Props = RootStackScreenProps<"DriverHome">;
 
 const ClockIcon = () => (
   <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B97B17" strokeWidth="2" strokeLinecap="round">
@@ -18,7 +23,7 @@ const ClockIcon = () => (
 const CarIcon = () => (
   <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4531F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <Path d="M3 11l1.2-4A2 2 0 0 1 6.1 5h11.8a2 2 0 0 1 1.9 2l1.2 4" />
-    <Rect x="3" y="11" width="18" height="6" rx="2" />
+    <Path d="M3 11h18v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6Z" />
     <Circle cx="7.5" cy="17.5" r="1.6" />
     <Circle cx="16.5" cy="17.5" r="1.6" />
   </Svg>
@@ -26,7 +31,7 @@ const CarIcon = () => (
 
 const NfcCardIcon = ({ size = 26 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <Rect x="4" y="2.5" width="16" height="19" rx="3" />
+    <Path d="M4 2.5h12a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H4" />
     <Path d="M9.5 9.5a4.2 4.2 0 0 1 5 0" />
     <Path d="M8 7a7 7 0 0 1 8 0" />
     <Circle cx="12" cy="13.5" r="1.4" fill="#fff" stroke="none" />
@@ -73,7 +78,23 @@ const ProfileIcon = ({ active }: { active: boolean }) => (
   </Svg>
 );
 
-const DriverHome = ({ navigation }: DriverHomeProps) => {
+type DashboardData = { stats: DashboardStats; queue: QueueItem[] };
+
+const DriverHome = ({ navigation }: Props) => {
+  const { driver } = useAuth();
+  const fetchDashboard = useCallback(
+    () => http.get<DashboardData>(ApiEndpoints.driver.dashboard),
+    [],
+  );
+  const { data, loading, error, reload } = useAsyncData<DashboardData>(fetchDashboard);
+
+  const stats = data?.stats;
+  const queue = data?.queue ?? [];
+  const firstName = driver?.fullName?.split(" ")[0] ?? "Driver";
+  const initials = driver?.initials ?? "??";
+  const propertyName = driver?.propertyName ?? "";
+  const isOnShift = driver?.status === "on_shift";
+
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.flex}>
@@ -82,12 +103,14 @@ const DriverHome = ({ navigation }: DriverHomeProps) => {
         <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>RK</Text>
+              <View style={[styles.avatar, driver?.avatarColor ? { backgroundColor: driver.avatarColor } : undefined]}>
+                <Text style={styles.avatarText}>{initials}</Text>
               </View>
               <View>
-                <Text style={styles.driverName}>Ramesh K.</Text>
-                <Text style={styles.driverStatus}>● On shift · JW Marriott Marquis</Text>
+                <Text style={styles.driverName}>{firstName}</Text>
+                <Text style={styles.driverStatus}>
+                  {isOnShift ? "On shift" : "Off duty"}{propertyName ? ` · ${propertyName}` : ""}
+                </Text>
               </View>
             </View>
             <TouchableOpacity style={styles.bellButton} activeOpacity={0.7} onPress={() => navigation.navigate("DriverReturnRequest")}>
@@ -98,15 +121,15 @@ const DriverHome = ({ navigation }: DriverHomeProps) => {
 
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>18</Text>
+              <Text style={styles.statValue}>{loading ? "—" : (stats?.parkedToday ?? 0)}</Text>
               <Text style={styles.statLabel}>Parked today</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={[styles.statValue, { color: "#E9A23B" }]}>3</Text>
+              <Text style={[styles.statValue, { color: "#E9A23B" }]}>{loading ? "—" : (stats?.returnsPending ?? 0)}</Text>
               <Text style={styles.statLabel}>Returns pending</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={[styles.statValue, { color: "#0C9D61" }]}>6:40</Text>
+              <Text style={[styles.statValue, { color: "#0C9D61" }]}>{loading ? "—" : `${stats?.avgReturnMin ?? 0}:00`}</Text>
               <Text style={styles.statLabel}>Avg return</Text>
             </View>
           </View>
@@ -140,40 +163,50 @@ const DriverHome = ({ navigation }: DriverHomeProps) => {
           </View>
 
           <View style={styles.queueList}>
-            <TouchableOpacity
-              style={styles.queueItem}
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("DriverPickupRequests")}
-            >
-              <View style={[styles.queueIconTile, { backgroundColor: "#FDF3E3" }]}>
-                <ClockIcon />
-              </View>
-              <View style={styles.queueItemInfo}>
-                <Text style={styles.queueItemPlate}>DXB A 74126 · White Lexus LX</Text>
-                <Text style={styles.queueItemDetail}>Return request · Zone B · Slot 42</Text>
-              </View>
-              <View style={styles.queueItemTimer}>
-                <Text style={[styles.queueItemTime, { color: "#B97B17" }]}>08:32</Text>
-                <Text style={styles.queueItemTimeLabel}>to arrive</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.queueItem}
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("DriverPickupRequests")}
-            >
-              <View style={[styles.queueIconTile, { backgroundColor: "#FEEFE8" }]}>
-                <CarIcon />
-              </View>
-              <View style={styles.queueItemInfo}>
-                <Text style={styles.queueItemPlate}>DXB J 5580 · Black G63</Text>
-                <Text style={styles.queueItemDetail}>To park · card 7204 active</Text>
-              </View>
-              <View style={styles.parkBadge}>
-                <Text style={styles.parkBadgeText}>Park</Text>
-              </View>
-            </TouchableOpacity>
+            {loading ? (
+              <ActivityIndicator size="small" color="#F4531F" style={{ marginTop: 16 }} />
+            ) : error ? (
+              <TouchableOpacity onPress={reload} activeOpacity={0.7}>
+                <Text style={[styles.emptyQueue, { color: "#F4531F" }]}>Failed to load — tap to retry</Text>
+              </TouchableOpacity>
+            ) : queue.length === 0 ? (
+              <Text style={styles.emptyQueue}>No active orders</Text>
+            ) : (
+              queue.slice(0, 5).map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[styles.queueItem, item.status === "returning" && styles.queueItemReturning]}
+                  activeOpacity={0.7}
+                  onPress={() => navigation.navigate("DriverPickupRequests")}
+                >
+                  <View style={[styles.queueIconTile, { backgroundColor: item.status === "returning" ? "#FDF3E3" : "#FEEFE8" }]}>
+                    {item.status === "returning" ? <ClockIcon /> : <CarIcon />}
+                  </View>
+                  <View style={styles.queueItemInfo}>
+                    <Text style={styles.queueItemPlate}>
+                      {item.plate} · {item.car}
+                    </Text>
+                    <Text style={styles.queueItemDetail}>
+                      {item.status === "returning"
+                        ? `Return request · Zone ${item.zone ?? "?"} · Slot ${item.slot ?? "?"}`
+                        : `To park · card ${item.cardUid ?? "?"}`}
+                    </Text>
+                  </View>
+                  {item.guestEta ? (
+                    <View style={styles.queueItemTimer}>
+                      <Text style={[styles.queueItemTime, { color: "#B97B17" }]}>
+                        {new Date(item.guestEta).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                      </Text>
+                      <Text style={styles.queueItemTimeLabel}>ETA</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.parkBadge}>
+                      <Text style={styles.parkBadgeText}>Park</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         </ScrollView>
 
@@ -370,6 +403,13 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingBottom: 16,
   },
+  emptyQueue: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#6C7A93",
+    textAlign: "center",
+    marginTop: 16,
+  },
   queueItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -379,6 +419,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 13,
     gap: 12,
+  },
+  queueItemReturning: {
+    borderColor: "#E9A23B",
   },
   queueIconTile: {
     width: 42,

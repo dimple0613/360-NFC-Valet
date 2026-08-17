@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { http } from "../../api/client";
+import { ApiEndpoints } from "../../api/endpoints";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
 
-type DriverCardActivatedProps = RootStackScreenProps<"DriverCardActivated">;
+type Props = RootStackScreenProps<"DriverCardActivated">;
 
 const CheckIcon = () => (
   <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -13,10 +15,31 @@ const CheckIcon = () => (
   </Svg>
 );
 
-const DriverCardActivated = ({ navigation }: DriverCardActivatedProps) => {
-  const [floor, setFloor] = useState("B2");
-  const [zone, setZone] = useState("Zone B");
-  const [parkingNum, setParkingNum] = useState("42");
+const DriverCardActivated = ({ navigation, route }: Props) => {
+  const { orderId, plate, carDesc } = route.params;
+  const [zone, setZone] = useState("");
+  const [slot, setSlot] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handlePark = async () => {
+    if (!zone.trim() || !slot.trim()) {
+      Alert.alert("Location required", "Enter both zone and slot.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await http.patch<{ ok: boolean }>(
+        ApiEndpoints.driver.orderStatus(orderId),
+        { status: "parked", zone: zone.trim(), slot: slot.trim() },
+      );
+      navigation.navigate("DriverHome");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to update";
+      Alert.alert("Error", message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -29,15 +52,15 @@ const DriverCardActivated = ({ navigation }: DriverCardActivatedProps) => {
               <CheckIcon />
             </View>
             <View>
-              <Text style={styles.successTitle}>Card 7204 activated</Text>
-              <Text style={styles.successSubtitle}>Hand the card to the guest — they're all set.</Text>
+              <Text style={styles.successTitle}>Order #{orderId} created</Text>
+              <Text style={styles.successSubtitle}>Now park the car and enter its location.</Text>
             </View>
           </View>
 
           <View style={styles.carInfoCard}>
             <View>
-              <Text style={styles.carPlate}>DXB · J 5580</Text>
-              <Text style={styles.carDesc}>Black Mercedes G63 AMG</Text>
+              <Text style={styles.carPlate}>{plate}</Text>
+              <Text style={styles.carDesc}>{carDesc}</Text>
             </View>
             <View style={styles.toParkBadge}>
               <Text style={styles.toParkBadgeText}>To park</Text>
@@ -45,36 +68,26 @@ const DriverCardActivated = ({ navigation }: DriverCardActivatedProps) => {
           </View>
 
           <Text style={styles.sectionTitle}>Where did you park it?</Text>
-          <Text style={styles.sectionHint}>Type it exactly as you'd say it — this keeps retrieval under 2 minutes.</Text>
 
           <View style={styles.fieldsContainer}>
             <View>
-              <Text style={styles.fieldLabel}>FLOOR</Text>
-              <TextInput
-                style={styles.textInput}
-                value={floor}
-                onChangeText={setFloor}
-                placeholder="e.g. B2, G"
-                placeholderTextColor="#9AA6BC"
-              />
-            </View>
-            <View>
-              <Text style={styles.fieldLabel}>PARK ZONE</Text>
+              <Text style={styles.fieldLabel}>ZONE</Text>
               <TextInput
                 style={styles.textInput}
                 value={zone}
                 onChangeText={setZone}
                 placeholder="e.g. Zone B"
                 placeholderTextColor="#9AA6BC"
+                autoCapitalize="characters"
               />
             </View>
             <View>
-              <Text style={styles.fieldLabel}>PARKING NUMBER</Text>
+              <Text style={styles.fieldLabel}>SLOT NUMBER</Text>
               <TextInput
-                style={styles.textInputActive}
-                value={parkingNum}
-                onChangeText={setParkingNum}
-                placeholder="e.g. 42, P-108"
+                style={styles.textInput}
+                value={slot}
+                onChangeText={setSlot}
+                placeholder="e.g. 42"
                 placeholderTextColor="#9AA6BC"
               />
             </View>
@@ -84,10 +97,17 @@ const DriverCardActivated = ({ navigation }: DriverCardActivatedProps) => {
         <View style={styles.bottomButtonContainer}>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => navigation.navigate("DriverHome")}
+            onPress={handlePark}
+            disabled={loading}
           >
-            <View style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Parked at {floor} · {zone} · {parkingNum} — Close order</Text>
+            <View style={[styles.closeButton, loading && { opacity: 0.7 }]}>
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.closeButtonText}>
+                  Park at {zone || "?"} · {slot || "?"} — Save
+                </Text>
+              )}
             </View>
           </TouchableOpacity>
         </View>
@@ -181,11 +201,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 4,
   },
-  sectionHint: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#6C7A93",
-  },
   fieldsContainer: {
     gap: 12,
     marginTop: 16,
@@ -198,17 +213,6 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     marginBottom: 6,
   },
-  inputField: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1.5,
-    borderColor: "#E7EAF0",
-    borderRadius: 14,
-    padding: 14,
-    paddingLeft: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
   textInput: {
     backgroundColor: "#FFFFFF",
     borderWidth: 1.5,
@@ -219,31 +223,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     color: "#1C2B46",
-  },
-  textInputActive: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 2,
-    borderColor: "#F4531F",
-    borderRadius: 14,
-    padding: 14,
-    paddingLeft: 16,
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1C2B46",
-  },
-  inputFieldActive: {
-    borderWidth: 2,
-    borderColor: "#F4531F",
-  },
-  inputValue: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1C2B46",
-  },
-  inputPlaceholder: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#9AA6BC",
   },
   bottomButtonContainer: {
     paddingHorizontal: 22,

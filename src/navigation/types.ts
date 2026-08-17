@@ -2,15 +2,17 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 export type RootStackParamList = {
   DriverLogin: undefined;
+  DriverForgotPassword: undefined;
+  DriverResetPassword: { token: string };
   DriverSelectLocation: undefined;
   DriverHome: undefined;
   DriverNfcTap: undefined;
-  DriverCarDetails: undefined;
-  DriverCardActivated: undefined;
+  DriverCarDetails: { cardUid: string };
+  DriverCardActivated: { orderId: number; plate: string; carDesc: string };
   DriverPickupRequests: undefined;
-  DriverUpdateParking: undefined;
+  DriverUpdateParking: { orderId: number };
   DriverReturnRequest: undefined;
-  DriverRetrievalDetail: undefined;
+  DriverRetrievalDetail: { orderId: number };
   DriverHistory: undefined;
   DriverProfile: undefined;
 };

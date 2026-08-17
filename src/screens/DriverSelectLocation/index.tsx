@@ -1,25 +1,16 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import Svg, { Path, Rect } from "react-native-svg";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../context/AuthContext";
+import { http } from "../../api/client";
+import { ApiEndpoints } from "../../api/endpoints";
+import type { Property } from "../../types";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
 
-type DriverSelectLocationProps = RootStackScreenProps<"DriverSelectLocation">;
-
-type Location = {
-  id: string;
-  name: string;
-  area: string;
-  drivers: number;
-};
-
-const locations: Location[] = [
-  { id: "1", name: "JW Marriott Marquis", area: "Business Bay", drivers: 6 },
-  { id: "2", name: "Address Downtown", area: "Downtown Dubai", drivers: 4 },
-  { id: "3", name: "Atlantis The Royal", area: "Palm Jumeirah", drivers: 8 },
-];
+type Props = RootStackScreenProps<"DriverSelectLocation">;
 
 const BuildingIcon = ({ color }: { color: string }) => (
   <Svg
@@ -54,10 +45,49 @@ const CheckIcon = () => (
   </Svg>
 );
 
-const DriverSelectLocation = ({ navigation }: DriverSelectLocationProps) => {
-  const [selectedId, setSelectedId] = useState("1");
+const DriverSelectLocation = ({ navigation }: Props) => {
+  const { driver } = useAuth();
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const selectedLocation = locations.find((l) => l.id === selectedId);
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const res = await http.get<{ properties: Property[] }>(
+          ApiEndpoints.driver.properties,
+        );
+        setProperties(res.properties);
+        if (res.properties.length === 1) {
+          setSelectedId(res.properties[0].id);
+        }
+      } catch (err) {
+        Alert.alert("Error", "Failed to load locations");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProperties();
+  }, []);
+
+  const selectedLocation = properties.find((p) => p.id === selectedId);
+  const firstName = driver?.fullName?.split(" ")[0] ?? "Driver";
+
+  const handleStart = () => {
+    if (selectedId && selectedLocation) {
+      navigation.navigate("DriverHome");
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={[styles.flex, { justifyContent: "center", alignItems: "center" }]}>
+          <ActivityIndicator size="large" color="#F4531F" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -65,16 +95,16 @@ const DriverSelectLocation = ({ navigation }: DriverSelectLocationProps) => {
         <MobileStatusBar />
 
         <View style={styles.content}>
-          <Text style={styles.greeting}>Good morning, Ramesh 👋</Text>
+          <Text style={styles.greeting}>Good morning, {firstName}</Text>
           <Text style={styles.title}>Where are you working today?</Text>
 
           <View style={styles.locationList}>
-            {locations.map((location) => {
-              const isSelected = location.id === selectedId;
+            {properties.map((property) => {
+              const isSelected = property.id === selectedId;
               return (
                 <TouchableOpacity
-                  key={location.id}
-                  onPress={() => setSelectedId(location.id)}
+                  key={property.id}
+                  onPress={() => setSelectedId(property.id)}
                   activeOpacity={0.8}
                   style={[
                     styles.locationCard,
@@ -91,9 +121,9 @@ const DriverSelectLocation = ({ navigation }: DriverSelectLocationProps) => {
                   </View>
 
                   <View style={styles.locationInfo}>
-                    <Text style={styles.locationName}>{location.name}</Text>
+                    <Text style={styles.locationName}>{property.name}</Text>
                     <Text style={styles.locationArea}>
-                      {location.area} · {location.drivers} drivers on shift
+                      {property.area} · {property.driversOnShift} drivers on shift
                     </Text>
                   </View>
 
@@ -111,17 +141,18 @@ const DriverSelectLocation = ({ navigation }: DriverSelectLocationProps) => {
 
           <View style={styles.footer}>
             <TouchableOpacity
-              onPress={() => navigation.navigate("DriverHome")}
+              onPress={handleStart}
               activeOpacity={0.8}
+              disabled={!selectedId}
             >
               <LinearGradient
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 colors={["#F4531F", "#FF8A50"]}
-                style={styles.startButton}
+                style={[styles.startButton, !selectedId && { opacity: 0.5 }]}
               >
                 <Text style={styles.startButtonText}>
-                  Start my day at {selectedLocation?.name.split(" ")[0]}
+                  Start my day at {selectedLocation?.name.split(" ")[0] ?? "..."}
                 </Text>
               </LinearGradient>
             </TouchableOpacity>

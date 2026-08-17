@@ -3,8 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const PREFIX = "@360nfc";
 
 const StorageKeys = {
-  accessToken: `${PREFIX}:accessToken`,
-  refreshToken: `${PREFIX}:refreshToken`,
+  token: `${PREFIX}:token`,
   user: `${PREFIX}:user`,
 } as const;
 

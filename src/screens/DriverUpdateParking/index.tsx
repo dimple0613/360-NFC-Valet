@@ -1,487 +1,194 @@
-import React, {useState} from "react";
-import { View, ScrollView, Text, Image, TextInput, TouchableOpacity, } from "react-native";
-import {LinearGradient} from 'expo-linear-gradient';
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
+import Svg, { Path, Circle } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../context/AuthContext";
+import { http } from "../../api/client";
+import { ApiEndpoints } from "../../api/endpoints";
 import type { RootStackScreenProps } from "../../navigation";
-type DriverUpdateParkingProps = RootStackScreenProps<"DriverUpdateParking">;
-export default (props: DriverUpdateParkingProps) => {
-	const [textInput1, onChangeTextInput1] = useState('');
-	const [textInput2, onChangeTextInput2] = useState('');
-	return (
-		<SafeAreaView
-			style={{
-				flex: 1,
-				backgroundColor: "#FFFFFF",
-			}}>
-			<ScrollView
-				style={{
-					flex: 1,
-					backgroundColor: "#F8FAFC",
-				}}>
-				<View
-					style={{
-						marginBottom: 110,
-					}}>
-					<View
-						style={{
-							marginBottom: 16,
-						}}>
-						<View
-							style={{
-								flexDirection: "row",
-								justifyContent: "space-between",
-								alignItems: "center",
-								paddingVertical: 12,
-								paddingHorizontal: 24,
-							}}>
-							<Text
-								style={{
-									color: "#0F172A",
-									fontSize: 14,
-									fontWeight: "bold",
-								}}>
-								{"9:41"}
-							</Text>
-							<View
-								style={{
-									flexDirection: "row",
-									alignItems: "center",
-								}}>
-								<Image
-									source={require("../../../assets/status-signal.png")}
-									resizeMode={"stretch"}
-									style={{
-										width: 20,
-										height: 20,
-										marginRight: 8,
-									}}
-								/>
-								<Image
-									source={require("../../../assets/status-wifi.png")}
-									resizeMode={"stretch"}
-									style={{
-										width: 20,
-										height: 20,
-										marginRight: 8,
-									}}
-								/>
-								<Image
-									source={require("../../../assets/status-battery.png")}
-									resizeMode={"stretch"}
-									style={{
-										width: 28,
-										height: 20,
-									}}
-								/>
-							</View>
-						</View>
-						<LinearGradient
-							start={{x:0, y:0}}
-							end={{x:0, y:1}}
-							colors={["#2E0F54", "#0F103F"]}
-							style={{
-								borderBottomRightRadius: 24,
-								borderBottomLeftRadius: 24,
-								paddingTop: 12,
-								paddingRight: 24,
-							}}>
-							<View
-								style={{
-									flexDirection: "row",
-									justifyContent: "space-between",
-									alignItems: "center",
-									marginBottom: 12,
-									marginLeft: 24,
-								}}>
-								<TouchableOpacity onPress={() => props.navigation.goBack()}>
-									<Image
-										source={require("../../../assets/icon-back.png")}
-										resizeMode={"stretch"}
-										style={{
-											borderRadius: 18,
-											width: 36,
-											height: 32,
-											tintColor: "#FFFFFF",
-										}}
-									/>
-								</TouchableOpacity>
-								<Text
-									style={{
-										color: "#FFFFFF",
-										fontSize: 18,
-										fontWeight: "bold",
-									}}>
-									{"Update Parking"}
-								</Text>
-								<View
-									style={{
-										width: 36,
-										height: 32,
-									}}>
-								</View>
-							</View>
-							<Text
-								style={{
-									color: "#FFFFFF",
-									fontSize: 13,
-									marginBottom: 28,
-									marginLeft: 24,
-								}}>
-								{"Ritz-Carlton Regent Valet Services"}
-							</Text>
-						</LinearGradient>
-					</View>
-					<View
-						style={{
-							paddingHorizontal: 24,
-						}}>
-						<View
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-								backgroundColor: "#FFFFFF",
-								borderColor: "#E2E8F0",
-								borderRadius: 16,
-								borderWidth: 1,
-								padding: 16,
-								marginBottom: 20,
-								shadowColor: "#0F172A08",
-								shadowOpacity: 1,
-								shadowOffset: {
-								    width: 0,
-								    height: 4
-								},
-								shadowRadius: 12,
-								elevation: 12,
-							}}>
-							<Image
-								source={require("../../../assets/icon-car.png")}
-								resizeMode={"stretch"}
-								style={{
-									borderRadius: 10,
-									width: 40,
-									height: 40,
-									marginRight: 16,
-								}}
-							/>
-							<View
-								style={{
-									flex: 1,
-									marginRight: 16,
-								}}>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 14,
-										fontWeight: "bold",
-										marginBottom: 2,
-									}}>
-									{"Mercedes-Benz S-Class"}
-								</Text>
-								<Text
-									style={{
-										color: "#64748B",
-										fontSize: 12,
-									}}>
-									{"Obsidian Black • KSA-9082"}
-								</Text>
-							</View>
-							<View
-								style={{
-									backgroundColor: "#6C63FF0F",
-									borderRadius: 8,
-									paddingVertical: 3,
-									paddingHorizontal: 8,
-								}}>
-								<Text
-									style={{
-										color: "#6C63FF",
-										fontSize: 11,
-										fontWeight: "bold",
-									}}>
-									{"# 9841-A"}
-								</Text>
-							</View>
-						</View>
-						<View
-							style={{
-								backgroundColor: "#FFFFFF",
-								borderColor: "#E2E8F0",
-								borderRadius: 16,
-								borderWidth: 1,
-								padding: 20,
-								marginBottom: 20,
-							}}>
-							<View
-								style={{
-									flexDirection: "row",
-									justifyContent: "space-between",
-									alignItems: "center",
-									marginBottom: 16,
-								}}>
-								<Text
-									style={{
-										color: "#64748B",
-										fontSize: 14,
-										fontWeight: "bold",
-									}}>
-									{"Select Parking Slot"}
-								</Text>
-								<Text
-									style={{
-										color: "#6C63FF",
-										fontSize: 13,
-										fontWeight: "bold",
-									}}>
-									{"Zone B Active"}
-								</Text>
-							</View>
-							<View
-								style={{
-									height: 100,
-									marginBottom: 16,
-									backgroundColor: "#F8FAFC",
-									borderRadius: 8,
-									borderWidth: 1,
-									borderColor: "#E2E8F0",
-									borderStyle: "dashed",
-									alignItems: "center",
-									justifyContent: "center",
-								}}>
-								<Text
-									style={{
-										color: "#94A3B8",
-										fontSize: 13,
-									}}>
-									{"Parking Map"}
-								</Text>
-							</View>
-							<View
-								style={{
-									flexDirection: "row",
-									alignItems: "center",
-									paddingVertical: 8,
-								}}>
-								<View
-									style={{
-										flex: 1,
-										flexDirection: "row",
-										justifyContent: "center",
-										alignItems: "center",
-										marginRight: 45,
-									}}>
-									<View
-										style={{
-											width: 12,
-											height: 12,
-											backgroundColor: "#F1F5F9",
-											borderRadius: 3,
-											marginRight: 6,
-										}}
-									/>
-									<Text
-										style={{
-											color: "#64748B",
-											fontSize: 12,
-										}}>
-										{"Occupied"}
-									</Text>
-								</View>
-								<View
-									style={{
-										flex: 1,
-										flexDirection: "row",
-										justifyContent: "center",
-										alignItems: "center",
-										marginRight: 45,
-									}}>
-									<View
-										style={{
-											width: 12,
-											height: 12,
-											backgroundColor: "#6C63FF1F",
-											borderRadius: 3,
-											marginRight: 6,
-										}}
-									/>
-									<Text
-										style={{
-											color: "#6C63FF",
-											fontSize: 12,
-										}}>
-										{"Available"}
-									</Text>
-								</View>
-								<View
-									style={{
-										flex: 1,
-										flexDirection: "row",
-										justifyContent: "center",
-										alignItems: "center",
-									}}>
-									<View
-										style={{
-											width: 12,
-											height: 12,
-											backgroundColor: "#6C63FF",
-											borderRadius: 3,
-											marginRight: 6,
-										}}
-									/>
-									<Text
-										style={{
-											color: "#6C63FF",
-											fontSize: 12,
-											fontWeight: "bold",
-										}}>
-										{"Selected"}
-									</Text>
-								</View>
-							</View>
-						</View>
-						<View
-							style={{
-								flexDirection: "row",
-								alignItems: "center",
-							}}>
-							<View
-								style={{
-									flex: 1,
-									marginRight: 12,
-								}}>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 13,
-										fontWeight: "bold",
-										marginBottom: 8,
-									}}>
-									{"Selected Zone"}
-								</Text>
-								<TextInput
-									placeholder={"Zone B"}
-									placeholderTextColor="#94A3B8"
-									value={textInput1}
-									onChangeText={onChangeTextInput1}
-									style={{
-										color: "#0F172A",
-										fontSize: 14,
-										fontWeight: "bold",
-										backgroundColor: "#FFFFFF",
-										borderColor: "#6C63FF",
-										borderRadius: 12,
-										borderWidth: 2,
-										padding: 16,
-									}}
-								/>
-							</View>
-							<View
-								style={{
-									flex: 1,
-								}}>
-								<Text
-									style={{
-										color: "#0F172A",
-										fontSize: 13,
-										fontWeight: "bold",
-										marginBottom: 8,
-									}}>
-									{"Spot Number"}
-								</Text>
-								<TextInput
-									placeholder={"B2"}
-									placeholderTextColor="#94A3B8"
-									value={textInput2}
-									onChangeText={onChangeTextInput2}
-									style={{
-										color: "#0F172A",
-										fontSize: 14,
-										fontWeight: "bold",
-										backgroundColor: "#FFFFFF",
-										borderColor: "#6C63FF",
-										borderRadius: 12,
-										borderWidth: 2,
-										padding: 16,
-									}}
-								/>
-							</View>
-						</View>
-					</View>
-				</View>
-				<View
-					style={{
-						paddingBottom: 16,
-						paddingHorizontal: 24,
-					}}>
-					<View
-						style={{
-							flexDirection: "row",
-							alignItems: "center",
-							backgroundColor: "#ECFDF5",
-							borderColor: "#10B9811F",
-							borderRadius: 12,
-							borderWidth: 1,
-							paddingVertical: 12,
-							marginBottom: 16,
-						}}>
-						<View
-							style={{
-								width: 6,
-								height: 6,
-								borderRadius: 3,
-								backgroundColor: "#10B981",
-								marginLeft: 12,
-								marginRight: 8,
-							}}
-						/>
-						<Text
-							style={{
-								color: "#059669",
-								fontSize: 13,
-							}}>
-							{"Order transitions to Complete on submission."}
-						</Text>
-					</View>
-					<TouchableOpacity
-						onPress={() => alert('Pressed!')}
-						activeOpacity={0.8}>
-						<LinearGradient
-							start={{x:0, y:0.5}}
-							end={{x:1, y:0.5}}
-							colors={["#5B5BFF", "#8B5CF6"]}
-							style={{
-								alignItems: "center",
-								borderRadius: 27,
-								paddingVertical: 17,
-								marginBottom: 16,
-							}}>
-							<Text
-								style={{
-									color: "#FFFFFF",
-									fontSize: 16,
-									fontWeight: "bold",
-								}}>
-								{"Confirm & Close Order"}
-							</Text>
-						</LinearGradient>
-					</TouchableOpacity>
-					<View
-						style={{
-							alignItems: "center",
-							paddingTop: 21,
-						}}>
-						<View
-							style={{
-								width: 139,
-								height: 5,
-								backgroundColor: "#0F172A",
-								borderRadius: 100,
-								marginBottom: 8,
-							}}>
-						</View>
-					</View>
-				</View>
-			</ScrollView>
-		</SafeAreaView>
-	)
-}
+import MobileStatusBar from "../../components/ui/StatusBar";
+
+type Props = RootStackScreenProps<"DriverUpdateParking">;
+
+const BackIcon = () => (
+  <Svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M15 5l-7 7 7 7" />
+  </Svg>
+);
+
+const CarIcon = ({ size = 24 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#1C2B46" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M3 11l1.2-4A2 2 0 0 1 6.1 5h11.8a2 2 0 0 1 1.9 2l1.2 4" />
+    <Path d="M3 11h18v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6Z" />
+    <Circle cx="7.5" cy="17.5" r="1.6" />
+    <Circle cx="16.5" cy="17.5" r="1.6" />
+  </Svg>
+);
+
+const DriverUpdateParking = ({ navigation, route }: Props) => {
+  const { orderId } = route.params;
+  const { driver } = useAuth();
+  const [zone, setZone] = useState("");
+  const [slot, setSlot] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const propertyName = driver?.propertyName ?? "";
+
+  const handleConfirm = async () => {
+    if (!zone.trim() || !slot.trim()) {
+      Alert.alert("Location required", "Enter both zone and slot.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await http.patch<{ ok: boolean }>(
+        ApiEndpoints.driver.orderStatus(orderId),
+        { status: "parked", zone: zone.trim(), slot: slot.trim() },
+      );
+      navigation.navigate("DriverHome");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to update parking";
+      Alert.alert("Error", message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.flex}>
+        <MobileStatusBar />
+
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} activeOpacity={0.7} onPress={() => navigation.goBack()}>
+            <BackIcon />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Update Parking</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+
+        {propertyName ? (
+          <Text style={styles.propertyName}>{propertyName}</Text>
+        ) : null}
+
+        <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.orderCard}>
+            <View style={styles.orderCardLeft}>
+              <View style={styles.carIconTile}>
+                <CarIcon size={24} />
+              </View>
+              <View>
+                <Text style={styles.orderLabel}>ORDER</Text>
+                <Text style={styles.orderId}>#{orderId}</Text>
+              </View>
+            </View>
+            <View style={styles.statusBadge}>
+              <Text style={styles.statusBadgeText}>To park</Text>
+            </View>
+          </View>
+
+          <Text style={styles.sectionTitle}>Select parking location</Text>
+          <Text style={styles.sectionHint}>Enter the zone and slot where you parked the car.</Text>
+
+          <View style={styles.legend}>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: "#E7EAF0" }]} />
+              <Text style={styles.legendText}>Occupied</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: "#E7F7EF" }]} />
+              <Text style={styles.legendText}>Available</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: "#F4531F" }]} />
+              <Text style={styles.legendText}>Selected</Text>
+            </View>
+          </View>
+
+          <View style={styles.fieldsRow}>
+            <View style={styles.fieldHalf}>
+              <Text style={styles.fieldLabel}>ZONE</Text>
+              <TextInput
+                style={styles.textInput}
+                value={zone}
+                onChangeText={setZone}
+                placeholder="e.g. Zone B"
+                placeholderTextColor="#9AA6BC"
+                autoCapitalize="characters"
+              />
+            </View>
+            <View style={styles.fieldHalf}>
+              <Text style={styles.fieldLabel}>SLOT</Text>
+              <TextInput
+                style={styles.textInput}
+                value={slot}
+                onChangeText={setSlot}
+                placeholder="e.g. 42"
+                placeholderTextColor="#9AA6BC"
+              />
+            </View>
+          </View>
+
+          <View style={styles.infoBanner}>
+            <View style={styles.infoDot} />
+            <Text style={styles.infoBannerText}>Order transitions to Parked on submission.</Text>
+          </View>
+        </ScrollView>
+
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity activeOpacity={0.8} onPress={handleConfirm} disabled={loading}>
+            <LinearGradient
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              colors={["#F4531F", "#FF8A50"]}
+              style={[styles.confirmButton, loading && { opacity: 0.7 }]}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.confirmButtonText}>Confirm & Close Order</Text>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: "#F6F7F9" },
+  flex: { flex: 1 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 22, paddingTop: 12 },
+  backButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#FFFFFF", borderWidth: 1.5, borderColor: "#E7EAF0", alignItems: "center", justifyContent: "center" },
+  headerTitle: { fontSize: 15, fontWeight: "800", color: "#1C2B46" },
+  headerSpacer: { width: 40 },
+  propertyName: { fontSize: 12, fontWeight: "600", color: "#6C7A93", paddingHorizontal: 22, marginTop: 6 },
+  scrollContent: { paddingHorizontal: 22, paddingTop: 16, paddingBottom: 24 },
+  orderCard: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E7EAF0", borderRadius: 16, padding: 16 },
+  orderCardLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
+  carIconTile: { width: 44, height: 44, borderRadius: 12, backgroundColor: "#F6F7F9", alignItems: "center", justifyContent: "center" },
+  orderLabel: { fontSize: 10, fontWeight: "800", letterSpacing: 1, color: "#6C7A93", textTransform: "uppercase" },
+  orderId: { fontSize: 15, fontWeight: "800", color: "#1C2B46", marginTop: 2 },
+  statusBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99, backgroundColor: "#FEEFE8" },
+  statusBadgeText: { fontSize: 11, fontWeight: "800", color: "#D6430F" },
+  sectionTitle: { fontSize: 15, fontWeight: "800", color: "#1C2B46", marginTop: 22, marginBottom: 4 },
+  sectionHint: { fontSize: 12, fontWeight: "500", color: "#6C7A93" },
+  legend: { flexDirection: "row", gap: 16, marginTop: 14, marginBottom: 6 },
+  legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  legendDot: { width: 10, height: 10, borderRadius: 3 },
+  legendText: { fontSize: 11, fontWeight: "600", color: "#6C7A93" },
+  fieldsRow: { flexDirection: "row", gap: 12, marginTop: 12 },
+  fieldHalf: { flex: 1 },
+  fieldLabel: { fontSize: 10.5, fontWeight: "800", letterSpacing: 1.2, color: "#6C7A93", textTransform: "uppercase", marginBottom: 6 },
+  textInput: { backgroundColor: "#FFFFFF", borderWidth: 1.5, borderColor: "#E7EAF0", borderRadius: 14, padding: 14, paddingLeft: 16, fontSize: 15, fontWeight: "700", color: "#1C2B46" },
+  infoBanner: { flexDirection: "row", alignItems: "center", backgroundColor: "#E7F7EF", borderRadius: 12, padding: 12, paddingLeft: 14, marginTop: 18, gap: 8 },
+  infoDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#0C9D61" },
+  infoBannerText: { fontSize: 12, fontWeight: "600", color: "#0A7C4E" },
+  bottomContainer: { paddingHorizontal: 22, paddingTop: 14, paddingBottom: 34 },
+  confirmButton: { alignItems: "center", borderRadius: 99, paddingVertical: 17 },
+  confirmButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "800" },
+});
+
+export default DriverUpdateParking;

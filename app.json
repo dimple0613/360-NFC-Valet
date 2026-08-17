@@ -19,7 +19,6 @@
       },
       "package": "com.valet.threesixtynfc"
     },
-    "web": {},
-    "newArchEnabled": false
+    "web": {}
   }
 }

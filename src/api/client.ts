@@ -1,7 +1,14 @@
 import { API_URL, API_TIMEOUT_MS } from "../config";
+import { storage, StorageKeys } from "../services/storage";
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: object | string;
+};
+
+let authLogoutHandler: (() => void) | null = null;
+
+export const setAuthLogoutHandler = (handler: () => void) => {
+  authLogoutHandler = handler;
 };
 
 const request = async <T>(
@@ -12,13 +19,19 @@ const request = async <T>(
   const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   try {
+    const token = await storage.get<string>(StorageKeys.token);
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(options.headers as Record<string, string> | undefined),
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_URL}${path}`, {
       ...options,
       signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers,
       body: options.body
         ? typeof options.body === "string"
           ? options.body
@@ -26,8 +39,16 @@ const request = async <T>(
         : undefined,
     });
 
+    if (response.status === 401) {
+      await storage.remove(StorageKeys.token);
+      await storage.remove(StorageKeys.user);
+      if (authLogoutHandler) authLogoutHandler();
+      throw new Error("Session expired");
+    }
+
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      const data = await response.json().catch(() => null);
+      throw new Error(data?.error || `API request failed with status ${response.status}`);
     }
 
     return (await response.json()) as T;

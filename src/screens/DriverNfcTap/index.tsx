@@ -1,12 +1,14 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Easing, ActivityIndicator, Alert } from "react-native";
 import Svg, { Path, Rect, Circle } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { http } from "../../api/client";
+import { ApiEndpoints } from "../../api/endpoints";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
 
-type DriverNfcTapProps = RootStackScreenProps<"DriverNfcTap">;
+type Props = RootStackScreenProps<"DriverNfcTap">;
 
 const BackIcon = () => (
   <Svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -76,7 +78,24 @@ const PulseRing = ({ delay }: { delay: number }) => {
   );
 };
 
-const DriverNfcTap = ({ navigation }: DriverNfcTapProps) => {
+const DriverNfcTap = ({ navigation }: Props) => {
+  const [manualUid, setManualUid] = useState("");
+  const [showManual, setShowManual] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleManualSubmit = async () => {
+    if (!manualUid.trim()) {
+      Alert.alert("Enter card UID", "Type the 4-digit UID printed on the card.");
+      return;
+    }
+    setLoading(true);
+    try {
+      navigation.navigate("DriverCarDetails", { cardUid: manualUid.trim() });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.flex}>
@@ -115,11 +134,39 @@ const DriverNfcTap = ({ navigation }: DriverNfcTapProps) => {
         </View>
 
         <View style={styles.bottomButtonContainer}>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("DriverCarDetails")}>
-            <View style={styles.manualButton}>
-              <Text style={styles.manualButtonText}>Enter card manually</Text>
+          {showManual ? (
+            <View style={styles.manualInputContainer}>
+              <TextInput
+                style={styles.manualInput}
+                value={manualUid}
+                onChangeText={setManualUid}
+                placeholder="Enter 4-digit UID"
+                placeholderTextColor="#9AA6BC"
+                keyboardType="number-pad"
+                maxLength={6}
+                autoFocus
+              />
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={handleManualSubmit}
+                disabled={loading}
+              >
+                <View style={styles.manualSubmitButton}>
+                  {loading ? (
+                    <ActivityIndicator color="#FFFFFF" size="small" />
+                  ) : (
+                    <Text style={styles.manualSubmitText}>Go</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
+          ) : (
+            <TouchableOpacity activeOpacity={0.8} onPress={() => setShowManual(true)}>
+              <View style={styles.manualButton}>
+                <Text style={styles.manualButtonText}>Enter card manually</Text>
+              </View>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -219,6 +266,37 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 14.5,
     fontWeight: "700",
+  },
+  manualInputContainer: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+  },
+  manualInput: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.2)",
+    borderRadius: 99,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 2,
+  },
+  manualSubmitButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#F4531F",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  manualSubmitText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "800",
   },
 });
 

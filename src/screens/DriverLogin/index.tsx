@@ -8,19 +8,40 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
-import Svg, { Rect, Path, Circle } from "react-native-svg";
+import Svg, { Path, Circle } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../context/AuthContext";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
 
-type DriverLoginProps = RootStackScreenProps<"DriverLogin">;
+type Props = RootStackScreenProps<"DriverLogin">;
 
-const DriverLogin = ({ navigation }: DriverLoginProps) => {
-  const [driverId, setDriverId] = useState("VD-0248");
+const DriverLogin = ({ navigation }: Props) => {
+  const { signIn } = useAuth();
+  const [valetId, setValetId] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSignIn = async () => {
+    if (!valetId.trim() || !password.trim()) {
+      Alert.alert("Missing fields", "Please enter your Driver ID and password.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await signIn(valetId.trim(), password.trim());
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Login failed";
+      Alert.alert("Sign in failed", message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -65,11 +86,11 @@ const DriverLogin = ({ navigation }: DriverLoginProps) => {
 
             <View style={styles.form}>
               <View style={styles.inputField}>
-                <Text style={styles.inputLabel}>Driver ID</Text>
+                <Text style={styles.inputLabel}>DRIVER ID</Text>
                 <TextInput
                   style={styles.textInput}
-                  value={driverId}
-                  onChangeText={setDriverId}
+                  value={valetId}
+                  onChangeText={setValetId}
                   placeholder="e.g. VD-0248"
                   placeholderTextColor="#9AA6BC"
                   autoCapitalize="characters"
@@ -78,12 +99,12 @@ const DriverLogin = ({ navigation }: DriverLoginProps) => {
 
               <View style={styles.inputFieldRow}>
                 <View style={styles.inputFieldLeft}>
-                  <Text style={styles.inputLabel}>Password</Text>
+                  <Text style={styles.inputLabel}>PASSWORD</Text>
                   <TextInput
                     style={styles.textInputPassword}
                     value={password}
                     onChangeText={setPassword}
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     placeholderTextColor="#9AA6BC"
                     secureTextEntry={!passwordVisible}
                   />
@@ -108,23 +129,32 @@ const DriverLogin = ({ navigation }: DriverLoginProps) => {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.forgotPassword} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.forgotPassword}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate("DriverForgotPassword")}
+            >
               <Text style={styles.forgotPasswordText}>Forgot password?</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.footer}>
             <TouchableOpacity
-              onPress={() => navigation.navigate("DriverSelectLocation")}
+              onPress={handleSignIn}
               activeOpacity={0.8}
+              disabled={loading}
             >
               <LinearGradient
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 colors={["#F4531F", "#FF8A50"]}
-                style={styles.signInButton}
+                style={[styles.signInButton, loading && { opacity: 0.7 }]}
               >
-                <Text style={styles.signInText}>Sign in</Text>
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.signInText}>Sign in</Text>
+                )}
               </LinearGradient>
             </TouchableOpacity>
 
@@ -201,12 +231,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     textTransform: "uppercase",
   },
-  inputValue: {
-    fontSize: 15.5,
-    fontWeight: "700",
-    color: "#1C2B46",
-    marginTop: 2,
-  },
   textInput: {
     fontSize: 15.5,
     fontWeight: "700",
@@ -234,13 +258,6 @@ const styles = StyleSheet.create({
   },
   inputFieldLeft: {
     flex: 1,
-  },
-  passwordValue: {
-    fontSize: 15.5,
-    fontWeight: "700",
-    color: "#1C2B46",
-    marginTop: 2,
-    letterSpacing: 3,
   },
   forgotPassword: {
     alignItems: "flex-end",
