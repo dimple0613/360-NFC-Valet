@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, TouchableOpacity, StyleSheet } from "react-native";
+import { TouchableOpacity, StyleSheet } from "react-native";
+import { Text } from "@/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors, Spacing, Typography } from "../../constants";
 

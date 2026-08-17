@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { View, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { Text } from "@/theme";
 import Svg, { Path, Circle } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";

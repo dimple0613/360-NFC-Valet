@@ -1,5 +1,4 @@
 const pathModule = require("path");
-const srcDir = pathModule.resolve(__dirname, "src").replace(/\\/g, "/");
 const themeFile = pathModule.resolve(__dirname, "src/theme/index.tsx").replace(/\\/g, "/");
 
 module.exports = function fontAliasPlugin({ types: t }) {
@@ -9,7 +8,8 @@ module.exports = function fontAliasPlugin({ types: t }) {
     visitor: {
       ImportDeclaration(path) {
         const filename = (path.hub?.file?.opts?.filename ?? "").replace(/\\/g, "/");
-        if (!filename.startsWith(srcDir) || filename === themeFile) return;
+        if (filename.includes("node_modules")) return;
+        if (filename === themeFile) return;
 
         const source = path.node.source.value;
         if (source !== "react-native") return;
