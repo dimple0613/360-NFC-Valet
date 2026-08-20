@@ -60,6 +60,7 @@ const COLOR_MAP: Record<string, string> = {
 
 const DriverCarDetails = ({ navigation, route }: Props) => {
   const { cardUid } = route.params;
+  const isSerial = cardUid.includes(":") || cardUid.length > 6;
   const [plate, setPlate] = useState("");
   const [carMake, setCarMake] = useState("");
   const [carModel, setCarModel] = useState("");
@@ -136,6 +137,7 @@ const DriverCarDetails = ({ navigation, route }: Props) => {
       if (color) payload.carColor = color;
       if (retryCardNumber) {
         payload.cardNumber = retryCardNumber;
+        if (cardUid) payload.cardUid = cardUid;
       } else {
         payload.cardUid = cardUid;
       }
@@ -192,20 +194,24 @@ const DriverCarDetails = ({ navigation, route }: Props) => {
         <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
           <View style={styles.uidCard}>
             <View style={styles.uidLeft}>
-              <Text style={styles.uidLabel}>CARD UID — printed on card</Text>
-              <View style={styles.uidDigits}>
-                {cardUid.split("").map((digit, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.uidDigitBox,
-                      cardUid.length <= 4 && i === cardUid.length - 1 && styles.uidDigitBoxActive,
-                    ]}
-                  >
-                    <Text style={styles.uidDigitText}>{digit.toUpperCase()}</Text>
-                  </View>
-                ))}
-              </View>
+              <Text style={styles.uidLabel}>{isSerial ? "SERIAL NUMBER — chip ID" : "CARD NUMBER — printed on card"}</Text>
+              {isSerial ? (
+                <Text style={styles.uidSerialText}>{cardUid}</Text>
+              ) : (
+                <View style={styles.uidDigits}>
+                  {cardUid.split("").map((digit, i) => (
+                    <View
+                      key={i}
+                      style={[
+                        styles.uidDigitBox,
+                        cardUid.length <= 4 && i === cardUid.length - 1 && styles.uidDigitBoxActive,
+                      ]}
+                    >
+                      <Text style={styles.uidDigitText}>{digit.toUpperCase()}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
             <NfcSmallIcon />
           </View>
@@ -399,6 +405,13 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     color: "#9FB0CC",
     textTransform: "uppercase",
+  },
+  uidSerialText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 1.2,
+    marginTop: 10,
   },
   uidDigits: {
     flexDirection: "row",

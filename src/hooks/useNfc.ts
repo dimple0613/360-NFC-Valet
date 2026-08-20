@@ -23,15 +23,7 @@ export type TagRead = {
 function extractUidFromTag(tag: unknown): string | null {
   const rawUid = (tag as { id?: string })?.id;
   if (!rawUid) return null;
-  const cleaned = rawUid.replace(/[:\s-]/g, "");
-  const numericOnly = cleaned.replace(/[^0-9]/g, "");
-  if (/^\d{4,6}$/.test(numericOnly)) return numericOnly;
-  const hexMatch = cleaned.match(/[0-9A-Fa-f]{8,}/);
-  if (hexMatch) {
-    const decimal = parseInt(hexMatch[0], 16).toString();
-    if (/^\d{4,6}$/.test(decimal)) return decimal;
-  }
-  return null;
+  return rawUid;
 }
 
 function extractCardNumberFromNdef(message: unknown): string | null {

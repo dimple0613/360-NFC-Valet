@@ -86,6 +86,7 @@ const DriverNfcTap = ({ navigation }: Props) => {
   const [detectedUid, setDetectedUid] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [noNumber, setNoNumber] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
 
   const goToDetails = useCallback(
     (uid: string) => {
@@ -95,13 +96,20 @@ const DriverNfcTap = ({ navigation }: Props) => {
   );
 
   useEffect(() => {
-    if (!supported || confirming) return;
+    if (!supported || confirming || timedOut) return;
     let active = true;
+    const timer = setTimeout(() => {
+      if (!active) return;
+      active = false;
+      setTimedOut(true);
+    }, 30000);
+
     const poll = async () => {
       while (active) {
         const result = await readTag();
         if (!result || !active) continue;
         active = false;
+        clearTimeout(timer);
         if (result.fromNdef && result.uid) {
           goToDetails(result.uid);
           return;
@@ -119,8 +127,9 @@ const DriverNfcTap = ({ navigation }: Props) => {
     poll();
     return () => {
       active = false;
+      clearTimeout(timer);
     };
-  }, [supported, readTag, goToDetails, confirming]);
+  }, [supported, readTag, goToDetails, confirming, timedOut]);
 
   const handleManualSubmit = () => {
     if (!manualUid.trim()) {
@@ -176,7 +185,14 @@ const DriverNfcTap = ({ navigation }: Props) => {
               <Text style={styles.detectedLabel}>Card detected</Text>
               <Text style={styles.detectedUid}>{detectedUid}</Text>
               <Text style={styles.holdSubtitle}>
-                Does this match the 4-digit number printed on the card?
+                This is the serial number of the card. Continue with this card?
+              </Text>
+            </>
+          ) : timedOut ? (
+            <>
+              <Text style={styles.holdTitle}>No card detected</Text>
+              <Text style={styles.holdSubtitle}>
+                We couldn't read a card. Make sure NFC is on and hold the card flat on the back of the phone, then try again.
               </Text>
             </>
           ) : noNumber ? (
@@ -194,9 +210,8 @@ const DriverNfcTap = ({ navigation }: Props) => {
               </Text>
               <Text style={styles.holdSubtitle}>
                 {supported
-                  ? "Reading writes the card ID automatically."
+                  ? "Tap the card on the back of the phone to read its serial number."
                   : "NFC not available on this device."}
-                {"\n"}You'll confirm the 4-digit UID printed on the card next.
               </Text>
             </>
           )}
@@ -216,6 +231,12 @@ const DriverNfcTap = ({ navigation }: Props) => {
                 </View>
               </TouchableOpacity>
             </View>
+          ) : timedOut ? (
+            <TouchableOpacity activeOpacity={0.8} onPress={() => setTimedOut(false)}>
+              <View style={styles.manualButton}>
+                <Text style={styles.manualButtonText}>Try again</Text>
+              </View>
+            </TouchableOpacity>
           ) : showManual || noNumber ? (
             <View style={styles.manualInputContainer}>
               <TextInput
