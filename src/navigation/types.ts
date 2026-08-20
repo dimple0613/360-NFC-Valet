@@ -7,6 +7,7 @@ export type RootStackParamList = {
   DriverSelectLocation: undefined;
   DriverHome: undefined;
   DriverNfcTap: undefined;
+  DriverWriteCard: undefined;
   DriverCarDetails: { cardUid: string };
   DriverCardActivated: { orderId: number; plate: string; carDesc: string };
   DriverPickupRequests: undefined;

@@ -147,6 +147,14 @@ const DriverHome = ({ navigation }: Props) => {
             </LinearGradient>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            onPress={() => navigation.navigate("DriverWriteCard")}
+            activeOpacity={0.8}
+            style={styles.writeCardButton}
+          >
+            <Text style={styles.writeCardButtonText}>Write / encode a card</Text>
+          </TouchableOpacity>
+
           <View style={styles.queueHeader}>
             <Text style={styles.queueTitle}>Live queue</Text>
             <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("DriverPickupRequests")}>
@@ -334,6 +342,20 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "rgba(255,255,255,0.85)",
     marginTop: 2,
+  },
+  writeCardButton: {
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#E7EAF0",
+    alignItems: "center",
+  },
+  writeCardButtonText: {
+    color: "#F4531F",
+    fontSize: 13,
+    fontWeight: "700",
   },
   queueHeader: {
     flexDirection: "row",
