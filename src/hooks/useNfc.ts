@@ -13,6 +13,27 @@ type NdefRecordLike = {
   payload?: number[];
 };
 
+export type TagRead = {
+  state: "none" | "detected";
+  uid: string | null;
+  fromNdef: boolean;
+  rawUid: string | null;
+};
+
+function extractUidFromTag(tag: unknown): string | null {
+  const rawUid = (tag as { id?: string })?.id;
+  if (!rawUid) return null;
+  const cleaned = rawUid.replace(/[:\s-]/g, "");
+  const numericOnly = cleaned.replace(/[^0-9]/g, "");
+  if (/^\d{4,6}$/.test(numericOnly)) return numericOnly;
+  const hexMatch = cleaned.match(/[0-9A-Fa-f]{8,}/);
+  if (hexMatch) {
+    const decimal = parseInt(hexMatch[0], 16).toString();
+    if (/^\d{4,6}$/.test(decimal)) return decimal;
+  }
+  return null;
+}
+
 function extractCardNumberFromNdef(message: unknown): string | null {
   if (!message || !Array.isArray((message as { records?: unknown[] }).records)) return null;
   const records = (message as { records: NdefRecordLike[] }).records;
@@ -52,7 +73,7 @@ export function useNfc() {
     };
   }, []);
 
-  const readTag = useCallback(async (): Promise<string | null> => {
+  const readTag = useCallback(async (): Promise<TagRead | null> => {
     try {
       setReading(true);
       try {
@@ -70,21 +91,12 @@ export function useNfc() {
       }
       const tag = await NfcManager.getTag();
       console.log("[NFC] Tag", JSON.stringify(tag));
+      const rawUid = (tag as unknown as { id?: string })?.id ?? null;
       const ndefMessage = (tag as unknown as { ndefMessage?: unknown })?.ndefMessage;
       const ndefCard = extractCardNumberFromNdef(ndefMessage);
-      if (ndefCard) return ndefCard;
-      const rawUid = tag?.id;
-      if (rawUid) {
-        const cleaned = rawUid.replace(/[:\s-]/g, "");
-        const numericOnly = cleaned.replace(/[^0-9]/g, "");
-        if (/^\d{4,6}$/.test(numericOnly)) return numericOnly;
-        const hexMatch = cleaned.match(/[0-9A-Fa-f]{8,}/);
-        if (hexMatch) {
-          const decimal = parseInt(hexMatch[0], 16).toString();
-          if (/^\d{4,6}$/.test(decimal)) return decimal;
-        }
-      }
-      return null;
+      if (ndefCard) return { state: "detected", uid: ndefCard, fromNdef: true, rawUid };
+      const uidFromTag = extractUidFromTag(tag);
+      return { state: "detected", uid: uidFromTag, fromNdef: false, rawUid };
     } catch {
       return null;
     } finally {
@@ -99,10 +111,10 @@ export function useNfc() {
     };
   }, []);
 
-  const readTagWithDelay = useCallback(async (): Promise<string | null> => {
-    const uid = await readTag();
-    if (!uid) await sleep(SCAN_DELAY_MS);
-    return uid;
+  const readTagWithDelay = useCallback(async (): Promise<TagRead | null> => {
+    const result = await readTag();
+    if (!result) await sleep(SCAN_DELAY_MS);
+    return result;
   }, [readTag]);
 
   const writeCard = useCallback(async (number: string): Promise<boolean> => {

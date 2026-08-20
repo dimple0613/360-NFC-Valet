@@ -85,6 +85,7 @@ const DriverNfcTap = ({ navigation }: Props) => {
   const [showManual, setShowManual] = useState(false);
   const [detectedUid, setDetectedUid] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [noNumber, setNoNumber] = useState(false);
 
   const goToDetails = useCallback(
     (uid: string) => {
@@ -98,13 +99,21 @@ const DriverNfcTap = ({ navigation }: Props) => {
     let active = true;
     const poll = async () => {
       while (active) {
-        const uid = await readTag();
-        if (uid && active) {
-          setDetectedUid(uid);
-          setConfirming(true);
-          active = false;
+        const result = await readTag();
+        if (!result || !active) continue;
+        active = false;
+        if (result.fromNdef && result.uid) {
+          goToDetails(result.uid);
           return;
         }
+        if (result.uid) {
+          setDetectedUid(result.uid);
+          setConfirming(true);
+          return;
+        }
+        setNoNumber(true);
+        setShowManual(true);
+        return;
       }
     };
     poll();
@@ -170,6 +179,14 @@ const DriverNfcTap = ({ navigation }: Props) => {
                 Does this match the 4-digit number printed on the card?
               </Text>
             </>
+          ) : noNumber ? (
+            <>
+              <Text style={styles.holdTitle}>Card detected</Text>
+              <Text style={styles.holdSubtitle}>
+                No number is stored on this card.
+                {"\n"}Use "Write / encode a card" from the Home screen to store it, or enter the number printed on the card manually below.
+              </Text>
+            </>
           ) : (
             <>
               <Text style={styles.holdTitle}>
@@ -199,7 +216,7 @@ const DriverNfcTap = ({ navigation }: Props) => {
                 </View>
               </TouchableOpacity>
             </View>
-          ) : showManual ? (
+          ) : showManual || noNumber ? (
             <View style={styles.manualInputContainer}>
               <TextInput
                 style={styles.manualInput}
