@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Text } from "@/theme";
 import Svg, { Path } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
@@ -10,6 +10,7 @@ import { ApiEndpoints } from "../../api/endpoints";
 import type { Property } from "../../types";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
+import { toast } from "../../utils/toast";
 
 type Props = RootStackScreenProps<"DriverSelectLocation">;
 
@@ -63,7 +64,7 @@ const DriverSelectLocation = ({ navigation }: Props) => {
           setSelectedId(res.properties[0].id);
         }
       } catch (err) {
-        Alert.alert("Error", "Failed to load locations");
+        toast.error("Error", "Failed to load locations");
       } finally {
         setLoading(false);
       }
@@ -73,11 +74,19 @@ const DriverSelectLocation = ({ navigation }: Props) => {
 
   const selectedLocation = properties.find((p) => p.id === selectedId);
   const firstName = driver?.fullName?.split(" ")[0] ?? "Driver";
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
-  const handleStart = () => {
-    if (selectedId && selectedLocation) {
-      navigation.navigate("DriverHome");
+  const handleStart = async () => {
+    if (!selectedId || !selectedLocation) return;
+    try {
+      await http.patch(ApiEndpoints.driver.shift, { onShift: true, propertyId: selectedId });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Could not start shift";
+      toast.error("Shift error", msg);
+      return;
     }
+    navigation.navigate("DriverHome");
   };
 
   if (loading) {
@@ -96,7 +105,7 @@ const DriverSelectLocation = ({ navigation }: Props) => {
         <MobileStatusBar />
 
         <View style={styles.content}>
-          <Text style={styles.greeting}>Good morning, {firstName}</Text>
+          <Text style={styles.greeting}>{greeting}, {firstName} 👋</Text>
           <Text style={styles.title}>Where are you working today?</Text>
 
           <View style={styles.locationList}>
@@ -202,6 +211,8 @@ const styles = StyleSheet.create({
     borderColor: "#E7EAF0",
     borderRadius: 18,
     padding: 16,
+    paddingLeft: 18,
+    paddingRight: 18,
     gap: 14,
   },
   locationCardSelected: {
@@ -241,7 +252,7 @@ const styles = StyleSheet.create({
   radioSelected: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: 99,
     backgroundColor: "#F4531F",
     alignItems: "center",
     justifyContent: "center",
@@ -249,7 +260,7 @@ const styles = StyleSheet.create({
   radioUnselected: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: 99,
     borderWidth: 2,
     borderColor: "#E7EAF0",
   },

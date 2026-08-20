@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
+import { View, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { Text, TextInput } from "@/theme";
 import Svg, { Path, Circle } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,6 +9,9 @@ import { http } from "../../api/client";
 import { ApiEndpoints } from "../../api/endpoints";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
+import { toast } from "../../utils/toast";
+import { Formik } from "formik";
+import * as Yup from "yup";
 
 type Props = RootStackScreenProps<"DriverUpdateParking">;
 
@@ -30,31 +33,9 @@ const CarIcon = ({ size = 24 }: { size?: number }) => (
 const DriverUpdateParking = ({ navigation, route }: Props) => {
   const { orderId } = route.params;
   const { driver } = useAuth();
-  const [zone, setZone] = useState("");
-  const [slot, setSlot] = useState("");
   const [loading, setLoading] = useState(false);
 
   const propertyName = driver?.propertyName ?? "";
-
-  const handleConfirm = async () => {
-    if (!zone.trim() || !slot.trim()) {
-      Alert.alert("Location required", "Enter both zone and slot.");
-      return;
-    }
-    setLoading(true);
-    try {
-      await http.patch<{ ok: boolean }>(
-        ApiEndpoints.driver.orderStatus(orderId),
-        { status: "parked", zone: zone.trim(), slot: slot.trim() },
-      );
-      navigation.navigate("DriverHome");
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to update parking";
-      Alert.alert("Error", message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -73,86 +54,125 @@ const DriverUpdateParking = ({ navigation, route }: Props) => {
           <Text style={styles.propertyName}>{propertyName}</Text>
         ) : null}
 
-        <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.orderCard}>
-            <View style={styles.orderCardLeft}>
-              <View style={styles.carIconTile}>
-                <CarIcon size={24} />
+        <Formik
+          initialValues={{ zone: "", slot: "" }}
+          validationSchema={Yup.object({
+            zone: Yup.string().trim().required("Enter zone."),
+            slot: Yup.string().trim().required("Enter slot."),
+          })}
+          onSubmit={async (values, { setSubmitting }) => {
+            setLoading(true);
+            try {
+              await http.patch<{ ok: boolean }>(
+                ApiEndpoints.driver.orderStatus(orderId),
+                { status: "parked", zone: values.zone.trim(), slot: values.slot.trim() },
+              );
+              navigation.navigate("DriverHome");
+            } catch (err: unknown) {
+              const message =
+                err instanceof Error
+                  ? err.message
+                  : "Failed to update parking";
+              toast.error("Error", message);
+            } finally {
+              setLoading(false);
+              setSubmitting(false);
+            }
+          }}
+        >
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            isSubmitting,
+          }) => (
+            <>
+              <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
+                <View style={styles.orderCard}>
+                  <View style={styles.orderCardLeft}>
+                    <View style={styles.carIconTile}>
+                      <CarIcon size={24} />
+                    </View>
+                    <View>
+                      <Text style={styles.orderLabel}>ORDER</Text>
+                      <Text style={styles.orderId}>#{orderId}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.statusBadge}>
+                    <Text style={styles.statusBadgeText}>To park</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.sectionTitle}>Select parking location</Text>
+                <Text style={styles.sectionHint}>Enter the zone and slot where you parked the car.</Text>
+
+                <View style={styles.legend}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: "#E7EAF0" }]} />
+                    <Text style={styles.legendText}>Occupied</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: "#E7F7EF" }]} />
+                    <Text style={styles.legendText}>Available</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: "#F4531F" }]} />
+                    <Text style={styles.legendText}>Selected</Text>
+                  </View>
+                </View>
+
+                <View style={styles.fieldsRow}>
+                  <View style={styles.fieldHalf}>
+                    <Text style={styles.fieldLabel}>ZONE</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={values.zone}
+                      onChangeText={handleChange("zone")}
+                      onBlur={handleBlur("zone")}
+                      placeholder="e.g. Zone B"
+                      placeholderTextColor="#9AA6BC"
+                      autoCapitalize="characters"
+                    />
+                  </View>
+                  <View style={styles.fieldHalf}>
+                    <Text style={styles.fieldLabel}>SLOT</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={values.slot}
+                      onChangeText={handleChange("slot")}
+                      onBlur={handleBlur("slot")}
+                      placeholder="e.g. 42"
+                      placeholderTextColor="#9AA6BC"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.infoBanner}>
+                  <View style={styles.infoDot} />
+                  <Text style={styles.infoBannerText}>Order transitions to Parked on submission.</Text>
+                </View>
+              </ScrollView>
+
+              <View style={styles.bottomContainer}>
+                <TouchableOpacity activeOpacity={0.8} onPress={() => handleSubmit()} disabled={loading || isSubmitting}>
+                  <LinearGradient
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    colors={["#F4531F", "#FF8A50"]}
+                    style={[styles.confirmButton, (loading || isSubmitting) && { opacity: 0.7 }]}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#FFFFFF" />
+                    ) : (
+                      <Text style={styles.confirmButtonText}>Confirm & Close Order</Text>
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
               </View>
-              <View>
-                <Text style={styles.orderLabel}>ORDER</Text>
-                <Text style={styles.orderId}>#{orderId}</Text>
-              </View>
-            </View>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusBadgeText}>To park</Text>
-            </View>
-          </View>
-
-          <Text style={styles.sectionTitle}>Select parking location</Text>
-          <Text style={styles.sectionHint}>Enter the zone and slot where you parked the car.</Text>
-
-          <View style={styles.legend}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: "#E7EAF0" }]} />
-              <Text style={styles.legendText}>Occupied</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: "#E7F7EF" }]} />
-              <Text style={styles.legendText}>Available</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: "#F4531F" }]} />
-              <Text style={styles.legendText}>Selected</Text>
-            </View>
-          </View>
-
-          <View style={styles.fieldsRow}>
-            <View style={styles.fieldHalf}>
-              <Text style={styles.fieldLabel}>ZONE</Text>
-              <TextInput
-                style={styles.textInput}
-                value={zone}
-                onChangeText={setZone}
-                placeholder="e.g. Zone B"
-                placeholderTextColor="#9AA6BC"
-                autoCapitalize="characters"
-              />
-            </View>
-            <View style={styles.fieldHalf}>
-              <Text style={styles.fieldLabel}>SLOT</Text>
-              <TextInput
-                style={styles.textInput}
-                value={slot}
-                onChangeText={setSlot}
-                placeholder="e.g. 42"
-                placeholderTextColor="#9AA6BC"
-              />
-            </View>
-          </View>
-
-          <View style={styles.infoBanner}>
-            <View style={styles.infoDot} />
-            <Text style={styles.infoBannerText}>Order transitions to Parked on submission.</Text>
-          </View>
-        </ScrollView>
-
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity activeOpacity={0.8} onPress={handleConfirm} disabled={loading}>
-            <LinearGradient
-              start={{ x: 0, y: 0.5 }}
-              end={{ x: 1, y: 0.5 }}
-              colors={["#F4531F", "#FF8A50"]}
-              style={[styles.confirmButton, loading && { opacity: 0.7 }]}
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.confirmButtonText}>Confirm & Close Order</Text>
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+            </>
+          )}
+        </Formik>
       </View>
     </SafeAreaView>
   );

@@ -1,14 +1,16 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import { View, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { View, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { Text } from "@/theme";
 import Svg, { Path, Circle } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { http } from "../../api/client";
 import { ApiEndpoints } from "../../api/endpoints";
 import { useAsyncData } from "../../hooks/useAsyncData";
+import { useSocket } from "../../context/SocketContext";
 import type { QueueItem } from "../../types";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
+import { toast } from "../../utils/toast";
 
 type Props = RootStackScreenProps<"DriverRetrievalDetail">;
 
@@ -63,33 +65,58 @@ const TimerRing = ({ seconds }: { seconds: number }) => {
 const DriverRetrievalDetail = ({ navigation, route }: Props) => {
   const { orderId } = route.params;
   const [submitting, setSubmitting] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchOrder = useCallback(
     () => http.get<{ queue: QueueItem[] }>(ApiEndpoints.driver.queue),
     [],
   );
-  const { data, loading } = useAsyncData<{ queue: QueueItem[] }>(fetchOrder);
+  const { data, loading, reload } = useAsyncData<{ queue: QueueItem[] }>(fetchOrder);
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+    const onEvent = () => reload();
+    socket.on("valet.order.return.requested", onEvent);
+    socket.on("valet.order.completed", onEvent);
+    socket.on("valet.order.parked", onEvent);
+    socket.on("valet.delay.notified", onEvent);
+    return () => {
+      socket.off("valet.order.return.requested", onEvent);
+      socket.off("valet.order.completed", onEvent);
+      socket.off("valet.order.parked", onEvent);
+      socket.off("valet.delay.notified", onEvent);
+    };
+  }, [socket, reload]);
 
   const order = data?.queue.find((q) => q.id === orderId);
 
-  const [countdown, setCountdown] = useState(0);
-
+  const [now, setNow] = useState(Date.now());
   useEffect(() => {
-    if (order?.guestEta) {
-      const remaining = Math.max(0, Math.floor((new Date(order.guestEta).getTime() - Date.now()) / 1000));
-      setCountdown(remaining);
-    }
-  }, [order?.guestEta]);
-
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
   }, []);
+
+  const countdown = order?.guestEta
+    ? Math.max(0, Math.floor((new Date(order.guestEta).getTime() - now) / 1000))
+    : 0;
+
+  const addMinutes = async (extraMinutes: number) => {
+    setSubmitting(true);
+    try {
+      const newMinutes = Math.ceil(countdown / 60) + extraMinutes;
+      await http.patch<{ ok: boolean }>(
+        ApiEndpoints.driver.orderStatus(orderId),
+        { status: "returning", guestEta: newMinutes },
+      );
+      reload();
+      toast.success("ETA updated", `Added ${extraMinutes} minutes to guest ETA.`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to update ETA";
+      toast.error("Error", message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleArrived = async () => {
     setSubmitting(true);
@@ -101,9 +128,18 @@ const DriverRetrievalDetail = ({ navigation, route }: Props) => {
       navigation.navigate("DriverHome");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed";
-      Alert.alert("Error", message);
+      toast.error("Error", message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleNotifyDelay = async () => {
+    try {
+      await http.post<{ ok: boolean }>(ApiEndpoints.driver.notifyDelay, { orderId });
+      toast.success("Delay notified", "Guest has been notified of the delay.");
+    } catch {
+      toast.error("Error", "Failed to notify guest. Please try again.");
     }
   };
 
@@ -148,6 +184,17 @@ const DriverRetrievalDetail = ({ navigation, route }: Props) => {
         <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
           <View style={styles.timerSection}>
             <TimerRing seconds={countdown} />
+            <View style={styles.timerButtons}>
+              <TouchableOpacity style={styles.timerBtn} activeOpacity={0.7} onPress={() => addMinutes(5)}>
+                <Text style={styles.timerBtnText}>+5 min</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.timerBtn} activeOpacity={0.7} onPress={() => addMinutes(10)}>
+                <Text style={styles.timerBtnText}>+10 min</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.timerBtnNotify} activeOpacity={0.7} onPress={handleNotifyDelay}>
+                <Text style={styles.timerBtnNotifyText}>Notify delay</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.carInfoCard}>
@@ -171,9 +218,14 @@ const DriverRetrievalDetail = ({ navigation, route }: Props) => {
                 <Text style={styles.infoCellValue}>{order.slot ?? "—"}</Text>
               </View>
               <View style={styles.infoCell}>
-                <Text style={styles.infoCellLabel}>STATUS</Text>
-                <Text style={styles.infoCellValue}>{order.status.toUpperCase()}</Text>
+                <Text style={styles.infoCellLabel}>DROPPED</Text>
+                <Text style={styles.infoCellValue}>{order.droppedAt ? new Date(order.droppedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "—"}</Text>
               </View>
+            </View>
+
+            <View style={styles.validationBanner}>
+              <CheckIcon />
+              <Text style={styles.validationText}>Valet validated {"\u00B7"} parking free</Text>
             </View>
           </View>
         </ScrollView>
@@ -204,6 +256,11 @@ const styles = StyleSheet.create({
   cardBadgeText: { fontSize: 11, fontWeight: "800", color: "#D6430F" },
   scrollContent: { paddingHorizontal: 22, paddingTop: 18, paddingBottom: 14 },
   timerSection: { alignItems: "center", marginTop: 8 },
+  timerButtons: { flexDirection: "row", gap: 9, marginTop: 16 },
+  timerBtn: { paddingVertical: 9, paddingHorizontal: 17, borderRadius: 99, backgroundColor: "#FFFFFF", borderWidth: 1.5, borderColor: "#E7EAF0" },
+  timerBtnText: { fontSize: 13, fontWeight: "800", color: "#1C2B46" },
+  timerBtnNotify: { paddingVertical: 9, paddingHorizontal: 17, borderRadius: 99, backgroundColor: "#FDF3E3", borderWidth: 1.5, borderColor: "#F2DDB2" },
+  timerBtnNotifyText: { fontSize: 13, fontWeight: "800", color: "#B97B17" },
   timerContainer: { position: "relative", width: 190, height: 190 },
   timerTextContainer: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0, alignItems: "center", justifyContent: "center" },
   timerValue: { fontSize: 38, fontWeight: "800", letterSpacing: -1, color: "#1C2B46" },
@@ -217,6 +274,8 @@ const styles = StyleSheet.create({
   infoCell: { flex: 1, backgroundColor: "#F6F7F9", borderRadius: 12, padding: 10, paddingLeft: 12 },
   infoCellLabel: { fontSize: 10, fontWeight: "800", letterSpacing: 1, color: "#6C7A93", textTransform: "uppercase" },
   infoCellValue: { fontSize: 14, fontWeight: "800", marginTop: 2, color: "#1C2B46" },
+  validationBanner: { flexDirection: "row", gap: 8, alignItems: "center", marginTop: 13, backgroundColor: "#E7F7EF", borderRadius: 12, padding: 10, paddingLeft: 13 },
+  validationText: { fontSize: 12, fontWeight: "700", color: "#0A7C4E", flex: 1 },
   bottomButtonContainer: { paddingHorizontal: 22, paddingTop: 14, paddingBottom: 34 },
   arrivedButton: { backgroundColor: "#0C9D61", borderRadius: 99, padding: 18, alignItems: "center", shadowColor: "#0C9D61", shadowOpacity: 0.32, shadowOffset: { width: 0, height: 12 }, shadowRadius: 24, elevation: 6 },
   arrivedButtonText: { color: "#FFFFFF", fontSize: 16.5, fontWeight: "800" },

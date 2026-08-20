@@ -7,7 +7,6 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { Text, TextInput } from "@/theme";
 import Svg, { Path } from "react-native-svg";
@@ -17,6 +16,9 @@ import { http } from "../../api/client";
 import { ApiEndpoints } from "../../api/endpoints";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
+import { toast } from "../../utils/toast";
+import { Formik } from "formik";
+import * as Yup from "yup";
 
 type Props = RootStackScreenProps<"DriverResetPassword">;
 
@@ -28,39 +30,7 @@ const BackIcon = () => (
 
 const DriverResetPassword = ({ navigation, route }: Props) => {
   const { token } = route.params;
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const handleReset = async () => {
-    if (!password.trim()) {
-      Alert.alert("Password required", "Enter a new password.");
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert("Too short", "Password must be at least 6 characters.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      Alert.alert("Mismatch", "Passwords do not match.");
-      return;
-    }
-    setLoading(true);
-    try {
-      await http.post<{ ok: boolean }>(
-        ApiEndpoints.auth.driverResetPassword,
-        { token, password: password.trim() },
-      );
-      Alert.alert("Success", "Your password has been reset. You can now sign in.", [
-        { text: "OK", onPress: () => navigation.navigate("DriverLogin") },
-      ]);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to reset password";
-      Alert.alert("Error", message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -79,55 +49,101 @@ const DriverResetPassword = ({ navigation, route }: Props) => {
             <BackIcon />
           </TouchableOpacity>
 
-          <View style={styles.content}>
-            <Text style={styles.title}>Reset password</Text>
-            <Text style={styles.subtitle}>
-              Enter your new password below.
-            </Text>
+          <Formik
+            initialValues={{ password: "", confirmPassword: "" }}
+            validationSchema={Yup.object({
+              password: Yup.string()
+                .trim()
+                .min(6, "Password must be at least 6 characters.")
+                .required("Enter a new password."),
+              confirmPassword: Yup.string()
+                .oneOf([Yup.ref("password")], "Passwords do not match.")
+                .required("Confirm your password."),
+            })}
+            onSubmit={async (values, { setSubmitting }) => {
+              setLoading(true);
+              try {
+                await http.post<{ ok: boolean }>(
+                  ApiEndpoints.auth.driverResetPassword,
+                  { token, password: values.password.trim() },
+                );
+                toast.success(
+                  "Success",
+                  "Your password has been reset. You can now sign in.",
+                );
+                navigation.navigate("DriverLogin");
+              } catch (err: unknown) {
+                const message =
+                  err instanceof Error
+                    ? err.message
+                    : "Failed to reset password";
+                toast.error("Error", message);
+              } finally {
+                setLoading(false);
+                setSubmitting(false);
+              }
+            }}
+          >
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              isSubmitting,
+            }) => (
+              <View style={styles.content}>
+                <Text style={styles.title}>Reset password</Text>
+                <Text style={styles.subtitle}>
+                  Enter your new password below.
+                </Text>
 
-            <View style={styles.inputField}>
-              <Text style={styles.inputLabel}>NEW PASSWORD</Text>
-              <TextInput
-                style={styles.textInput}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="At least 6 characters"
-                placeholderTextColor="#9AA6BC"
-                secureTextEntry
-              />
-            </View>
+                <View style={styles.inputField}>
+                  <Text style={styles.inputLabel}>NEW PASSWORD</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={values.password}
+                    onChangeText={handleChange("password")}
+                    onBlur={handleBlur("password")}
+                    placeholder="At least 6 characters"
+                    placeholderTextColor="#9AA6BC"
+                    secureTextEntry
+                  />
+                </View>
 
-            <View style={styles.inputField}>
-              <Text style={styles.inputLabel}>CONFIRM PASSWORD</Text>
-              <TextInput
-                style={styles.textInput}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                placeholder="Re-enter password"
-                placeholderTextColor="#9AA6BC"
-                secureTextEntry
-              />
-            </View>
+                <View style={styles.inputField}>
+                  <Text style={styles.inputLabel}>CONFIRM PASSWORD</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={values.confirmPassword}
+                    onChangeText={handleChange("confirmPassword")}
+                    onBlur={handleBlur("confirmPassword")}
+                    placeholder="Re-enter password"
+                    placeholderTextColor="#9AA6BC"
+                    secureTextEntry
+                  />
+                </View>
 
-            <TouchableOpacity
-              onPress={handleReset}
-              activeOpacity={0.8}
-              disabled={loading}
-            >
-              <LinearGradient
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                colors={["#F4531F", "#FF8A50"]}
-                style={[styles.submitButton, loading && { opacity: 0.7 }]}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.submitText}>Reset password</Text>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
+                <TouchableOpacity
+                  onPress={() => handleSubmit()}
+                  activeOpacity={0.8}
+                  disabled={loading || isSubmitting}
+                >
+                  <LinearGradient
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    colors={["#F4531F", "#FF8A50"]}
+                    style={[styles.submitButton, (loading || isSubmitting) && { opacity: 0.7 }]}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#FFFFFF" />
+                    ) : (
+                      <Text style={styles.submitText}>Reset password</Text>
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            )}
+          </Formik>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

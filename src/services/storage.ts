@@ -5,6 +5,7 @@ const PREFIX = "@360nfc";
 const StorageKeys = {
   token: `${PREFIX}:token`,
   user: `${PREFIX}:user`,
+  notificationsOn: `${PREFIX}:notificationsOn`,
 } as const;
 
 export const storage = {

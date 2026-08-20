@@ -7,7 +7,6 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { Text, TextInput } from "@/theme";
 import Svg, { Path, Circle } from "react-native-svg";
@@ -16,31 +15,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../context/AuthContext";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
+import { toast } from "../../utils/toast";
+import { Formik } from "formik";
+import * as Yup from "yup";
 
 type Props = RootStackScreenProps<"DriverLogin">;
 
 const DriverLogin = ({ navigation }: Props) => {
   const { signIn } = useAuth();
-  const [valetId, setValetId] = useState("");
-  const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const handleSignIn = async () => {
-    if (!valetId.trim() || !password.trim()) {
-      Alert.alert("Missing fields", "Please enter your Driver ID and password.");
-      return;
-    }
-    setLoading(true);
-    try {
-      await signIn(valetId.trim(), password.trim());
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Login failed";
-      Alert.alert("Sign in failed", message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -83,83 +67,125 @@ const DriverLogin = ({ navigation }: Props) => {
               Driver console. Sign in to start your shift.
             </Text>
 
-            <View style={styles.form}>
-              <View style={styles.inputField}>
-                <Text style={styles.inputLabel}>DRIVER ID</Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={valetId}
-                  onChangeText={setValetId}
-                  placeholder="e.g. VD-0248"
-                  placeholderTextColor="#9AA6BC"
-                  autoCapitalize="characters"
-                />
-              </View>
+            <Formik
+              initialValues={{ valetId: "", password: "" }}
+              validationSchema={Yup.object({
+                valetId: Yup.string()
+                  .trim()
+                  .required("Please enter your Driver ID."),
+                password: Yup.string()
+                  .trim()
+                  .required("Please enter your password."),
+              })}
+              onSubmit={async (values, { setSubmitting }) => {
+                setLoading(true);
+                try {
+                  await signIn(values.valetId.trim(), values.password.trim());
+                } catch (err: unknown) {
+                  const message =
+                    err instanceof Error ? err.message : "Login failed";
+                  toast.error("Sign in failed", message);
+                } finally {
+                  setLoading(false);
+                  setSubmitting(false);
+                }
+              }}
+            >
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                values,
+                isSubmitting,
+              }) => (
+                <>
+                  <View style={styles.form}>
+                    <View style={styles.inputField}>
+                      <Text style={styles.inputLabel}>DRIVER ID</Text>
+                      <TextInput
+                        style={styles.textInput}
+                        value={values.valetId}
+                        onChangeText={handleChange("valetId")}
+                        onBlur={handleBlur("valetId")}
+                        placeholder="e.g. VD-0248"
+                        placeholderTextColor="#9AA6BC"
+                        autoCapitalize="characters"
+                      />
+                    </View>
 
-              <View style={styles.inputFieldRow}>
-                <View style={styles.inputFieldLeft}>
-                  <Text style={styles.inputLabel}>PASSWORD</Text>
-                  <TextInput
-                    style={styles.textInputPassword}
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder="Enter your password"
-                    placeholderTextColor="#9AA6BC"
-                    secureTextEntry={!passwordVisible}
-                  />
-                </View>
-                <TouchableOpacity
-                  onPress={() => setPasswordVisible(!passwordVisible)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <Svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#6C7A93"
-                    strokeWidth="2"
-                    strokeLinecap="round"
+                    <View style={styles.inputFieldRow}>
+                      <View style={styles.inputFieldLeft}>
+                        <Text style={styles.inputLabel}>PASSWORD</Text>
+                        <TextInput
+                          style={styles.textInputPassword}
+                          value={values.password}
+                          onChangeText={handleChange("password")}
+                          onBlur={handleBlur("password")}
+                          placeholder="Enter your password"
+                          placeholderTextColor="#9AA6BC"
+                          secureTextEntry={!passwordVisible}
+                        />
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => setPasswordVisible(!passwordVisible)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <Svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#6C7A93"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        >
+                          <Path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z" />
+                          <Circle cx="12" cy="12" r="2.6" />
+                        </Svg>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    style={styles.forgotPassword}
+                    activeOpacity={0.7}
+                    onPress={() => navigation.navigate("DriverForgotPassword")}
                   >
-                    <Path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z" />
-                    <Circle cx="12" cy="12" r="2.6" />
-                  </Svg>
-                </TouchableOpacity>
-              </View>
-            </View>
+                    <Text style={styles.forgotPasswordText}>
+                      Forgot password?
+                    </Text>
+                  </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.forgotPassword}
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate("DriverForgotPassword")}
-            >
-              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-            </TouchableOpacity>
-          </View>
+                  <View style={styles.footer}>
+                    <TouchableOpacity
+                      onPress={() => handleSubmit()}
+                      activeOpacity={0.8}
+                      disabled={loading || isSubmitting}
+                    >
+                      <LinearGradient
+                        start={{ x: 0, y: 0.5 }}
+                        end={{ x: 1, y: 0.5 }}
+                        colors={["#F4531F", "#FF8A50"]}
+                        style={[
+                          styles.signInButton,
+                          (loading || isSubmitting) && { opacity: 0.7 },
+                        ]}
+                      >
+                        {loading ? (
+                          <ActivityIndicator color="#FFFFFF" />
+                        ) : (
+                          <Text style={styles.signInText}>Sign in</Text>
+                        )}
+                      </LinearGradient>
+                    </TouchableOpacity>
 
-          <View style={styles.footer}>
-            <TouchableOpacity
-              onPress={handleSignIn}
-              activeOpacity={0.8}
-              disabled={loading}
-            >
-              <LinearGradient
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                colors={["#F4531F", "#FF8A50"]}
-                style={[styles.signInButton, loading && { opacity: 0.7 }]}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.signInText}>Sign in</Text>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
-
-            <Text style={styles.footerNote}>
-              Accounts are created by your admin — no self sign-up.
-            </Text>
+                    <Text style={styles.footerNote}>
+                      Accounts are created by your admin — no self sign-up.
+                    </Text>
+                  </View>
+                </>
+              )}
+            </Formik>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -268,8 +294,7 @@ const styles = StyleSheet.create({
     color: "#F4531F",
   },
   footer: {
-    paddingHorizontal: 30,
-    paddingBottom: 34,
+    marginTop: "auto" as const,
   },
   signInButton: {
     alignItems: "center",

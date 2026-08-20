@@ -5,20 +5,45 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#6C63FF"
+      "backgroundColor": "#1C2B46"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/icon.png"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#6C63FF"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F4531F"
       },
-      "package": "com.valet.threesixtynfc"
+      "package": "com.valet.threesixtynfc",
+      "googleServicesFile": "./google-services.json",
+      "permissions": ["android.permission.NFC"],
+      "usesCleartextTraffic": true,
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#1C2B46"
+      }
     },
-    "web": {}
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "Allow 360 NFC Valet to read NFC cards for valet check-in.",
+          "includeNdefEntitlement": false
+        }
+      ]
+    ]
   }
 }

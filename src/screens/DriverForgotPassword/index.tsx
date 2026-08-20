@@ -7,7 +7,6 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { Text, TextInput } from "@/theme";
 import Svg, { Path } from "react-native-svg";
@@ -17,6 +16,9 @@ import { http } from "../../api/client";
 import { ApiEndpoints } from "../../api/endpoints";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
+import { toast } from "../../utils/toast";
+import { Formik } from "formik";
+import * as Yup from "yup";
 
 type Props = RootStackScreenProps<"DriverForgotPassword">;
 
@@ -27,33 +29,10 @@ const BackIcon = () => (
 );
 
 const DriverForgotPassword = ({ navigation }: Props) => {
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [resetToken, setResetToken] = useState<string | null>(null);
-
-  const handleSubmit = async () => {
-    if (!email.trim()) {
-      Alert.alert("Email required", "Enter your registered email address.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await http.post<{ ok: boolean; resetToken?: string }>(
-        ApiEndpoints.auth.driverForgotPassword,
-        { email: email.trim() },
-      );
-      if (res.resetToken) {
-        setResetToken(res.resetToken);
-      }
-      setSent(true);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to send reset link";
-      Alert.alert("Error", message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [submittedEmail, setSubmittedEmail] = useState("");
 
   if (sent) {
     return (
@@ -66,7 +45,7 @@ const DriverForgotPassword = ({ navigation }: Props) => {
             </View>
             <Text style={styles.sentTitle}>Check your email</Text>
             <Text style={styles.sentSubtitle}>
-              We've sent a password reset link to{"\n"}{email}
+              We've sent a password reset link to{"\n"}{submittedEmail}
             </Text>
 
             {resetToken && (
@@ -109,45 +88,87 @@ const DriverForgotPassword = ({ navigation }: Props) => {
             <BackIcon />
           </TouchableOpacity>
 
-          <View style={styles.content}>
-            <Text style={styles.title}>Forgot password?</Text>
-            <Text style={styles.subtitle}>
-              Enter your email address and we'll send you a reset link.
-            </Text>
+          <Formik
+            initialValues={{ email: "" }}
+            validationSchema={Yup.object({
+              email: Yup.string()
+                .trim()
+                .email("Enter a valid email address.")
+                .required("Enter your registered email address."),
+            })}
+            onSubmit={async (values, { setSubmitting }) => {
+              setLoading(true);
+              try {
+                const res = await http.post<{ ok: boolean; resetToken?: string }>(
+                  ApiEndpoints.auth.driverForgotPassword,
+                  { email: values.email.trim() },
+                );
+                if (res.resetToken) {
+                  setResetToken(res.resetToken);
+                }
+                setSubmittedEmail(values.email.trim());
+                setSent(true);
+              } catch (err: unknown) {
+                const message =
+                  err instanceof Error
+                    ? err.message
+                    : "Failed to send reset link";
+                toast.error("Error", message);
+              } finally {
+                setLoading(false);
+                setSubmitting(false);
+              }
+            }}
+          >
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              isSubmitting,
+            }) => (
+              <View style={styles.content}>
+                <Text style={styles.title}>Forgot password?</Text>
+                <Text style={styles.subtitle}>
+                  Enter your email address and we'll send you a reset link.
+                </Text>
 
-            <View style={styles.inputField}>
-              <Text style={styles.inputLabel}>EMAIL</Text>
-              <TextInput
-                style={styles.textInput}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="you@360valet.com"
-                placeholderTextColor="#9AA6BC"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
+                <View style={styles.inputField}>
+                  <Text style={styles.inputLabel}>EMAIL</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={values.email}
+                    onChangeText={handleChange("email")}
+                    onBlur={handleBlur("email")}
+                    placeholder="you@360valet.com"
+                    placeholderTextColor="#9AA6BC"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                </View>
 
-            <TouchableOpacity
-              onPress={handleSubmit}
-              activeOpacity={0.8}
-              disabled={loading}
-            >
-              <LinearGradient
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                colors={["#F4531F", "#FF8A50"]}
-                style={[styles.submitButton, loading && { opacity: 0.7 }]}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.submitText}>Send reset link</Text>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
+                <TouchableOpacity
+                  onPress={() => handleSubmit()}
+                  activeOpacity={0.8}
+                  disabled={loading || isSubmitting}
+                >
+                  <LinearGradient
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    colors={["#F4531F", "#FF8A50"]}
+                    style={[styles.submitButton, (loading || isSubmitting) && { opacity: 0.7 }]}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#FFFFFF" />
+                    ) : (
+                      <Text style={styles.submitText}>Send reset link</Text>
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            )}
+          </Formik>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

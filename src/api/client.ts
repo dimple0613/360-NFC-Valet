@@ -5,9 +5,9 @@ type RequestOptions = Omit<RequestInit, "body"> & {
   body?: object | string;
 };
 
-let authLogoutHandler: (() => void) | null = null;
+let authLogoutHandler: (() => void | Promise<void>) | null = null;
 
-export const setAuthLogoutHandler = (handler: () => void) => {
+export const setAuthLogoutHandler = (handler: () => void | Promise<void>) => {
   authLogoutHandler = handler;
 };
 
@@ -42,7 +42,7 @@ const request = async <T>(
     if (response.status === 401) {
       await storage.remove(StorageKeys.token);
       await storage.remove(StorageKeys.user);
-      if (authLogoutHandler) authLogoutHandler();
+      if (authLogoutHandler) await authLogoutHandler();
       throw new Error("Session expired");
     }
 

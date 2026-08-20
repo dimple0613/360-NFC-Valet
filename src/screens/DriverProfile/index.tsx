@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { Text } from "@/theme";
 import Svg, { Path, Circle } from "react-native-svg";
@@ -7,6 +7,8 @@ import { useAuth } from "../../context/AuthContext";
 import { http } from "../../api/client";
 import { ApiEndpoints } from "../../api/endpoints";
 import { useAsyncData } from "../../hooks/useAsyncData";
+import { TabBar } from "../../components";
+import { storage, StorageKeys } from "../../services/storage";
 import type { DriverProfile as DriverProfileType } from "../../types";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
@@ -41,45 +43,21 @@ const ChevronRight = () => (
   </Svg>
 );
 
-const NfcCardIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M4 2.5h12a3 3 0 0 1 3 3v13a3 3 0 0 1-3 3H4" />
-    <Path d="M9.5 9.5a4.2 4.2 0 0 1 5 0" />
-    <Path d="M8 7a7 7 0 0 1 8 0" />
-    <Circle cx="12" cy="13.5" r="1.4" fill="#fff" stroke="none" />
-  </Svg>
-);
-
-const HomeIcon = ({ active }: { active: boolean }) => (
-  <Svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={active ? "#F4531F" : "#9AA6BC"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M3 10.5 12 3l9 7.5" />
-    <Path d="M5 9.5V21h14V9.5" />
-  </Svg>
-);
-
-const RequestsIcon = ({ active }: { active: boolean }) => (
-  <Svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={active ? "#F4531F" : "#9AA6BC"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <Path d="M4 6h16M4 12h16M4 18h10" />
-  </Svg>
-);
-
-const HistoryIcon = ({ active }: { active: boolean }) => (
-  <Svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={active ? "#F4531F" : "#9AA6BC"} strokeWidth="2" strokeLinecap="round">
-    <Circle cx="12" cy="12" r="9" />
-    <Path d="M12 7v5l3 2" />
-  </Svg>
-);
-
-const ProfileIcon = ({ active }: { active: boolean }) => (
-  <Svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke={active ? "#F4531F" : "#9AA6BC"} strokeWidth="2" strokeLinecap="round">
-    <Circle cx="12" cy="8" r="3.6" />
-    <Path d="M5 20a7 7 0 0 1 14 0" />
-  </Svg>
-);
-
 const DriverProfile = ({ navigation }: Props) => {
   const { driver, signOut, refreshDriver } = useAuth();
   const [notificationsOn, setNotificationsOn] = useState(true);
+
+  useEffect(() => {
+    storage.get<boolean>(StorageKeys.notificationsOn).then((val) => {
+      if (val !== null) setNotificationsOn(val);
+    });
+  }, []);
+
+  const toggleNotifications = () => {
+    const next = !notificationsOn;
+    setNotificationsOn(next);
+    storage.set(StorageKeys.notificationsOn, next);
+  };
 
   const fetchProfile = () => http.get<{ driver: DriverProfileType }>(ApiEndpoints.driver.profile);
   const { data, loading } = useAsyncData<{ driver: DriverProfileType }>(fetchProfile);
@@ -100,7 +78,8 @@ const DriverProfile = ({ navigation }: Props) => {
     const diff = Date.now() - new Date(shiftStarted).getTime();
     const hours = Math.floor(diff / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);
-    return `${hours}h ${mins}m`;
+    const startedTime = new Date(shiftStarted).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    return `\u25CF On shift since ${startedTime} \u00B7 ${hours} h ${mins} m`;
   };
 
   const handleSignOut = async () => {
@@ -125,7 +104,7 @@ const DriverProfile = ({ navigation }: Props) => {
             <Text style={styles.subtitle}>{valetId} · {propertyName}</Text>
             {isOnShift && shiftStarted && (
               <View style={styles.shiftBadge}>
-                <Text style={styles.shiftBadgeText}>On shift · {formatShiftDuration()}</Text>
+                <Text style={styles.shiftBadgeText}>{formatShiftDuration()}</Text>
               </View>
             )}
           </View>
@@ -140,7 +119,7 @@ const DriverProfile = ({ navigation }: Props) => {
               <Text style={styles.statLabel}>Avg return</Text>
             </View>
             <View style={styles.statCard}>
-              {loading ? <ActivityIndicator size="small" color="#F4531F" /> : <Text style={[styles.statValue, { color: "#F4531F" }]}>0</Text>}
+              {loading ? <ActivityIndicator size="small" color="#F4531F" /> : <Text style={[styles.statValue, { color: "#6C7A93" }]}>—</Text>}
               <Text style={styles.statLabel}>Incidents</Text>
             </View>
           </View>
@@ -164,7 +143,7 @@ const DriverProfile = ({ navigation }: Props) => {
             <TouchableOpacity
               style={styles.menuItem}
               activeOpacity={0.7}
-              onPress={() => setNotificationsOn(!notificationsOn)}
+              onPress={toggleNotifications}
             >
               <View style={styles.menuItemLeft}>
                 <BellIcon />
@@ -193,27 +172,7 @@ const DriverProfile = ({ navigation }: Props) => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.tabBar}>
-          <TouchableOpacity style={styles.tabItem} activeOpacity={0.7} onPress={() => navigation.navigate("DriverHome")}>
-            <HomeIcon active={false} />
-            <Text style={styles.tabLabel}>Home</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabItem} activeOpacity={0.7} onPress={() => navigation.navigate("DriverPickupRequests")}>
-            <RequestsIcon active={false} />
-            <Text style={styles.tabLabel}>Requests</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.nfcTabButton} activeOpacity={0.8} onPress={() => navigation.navigate("DriverNfcTap")}>
-            <NfcCardIcon size={24} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabItem} activeOpacity={0.7} onPress={() => navigation.navigate("DriverHistory")}>
-            <HistoryIcon active={false} />
-            <Text style={styles.tabLabel}>History</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabItem} activeOpacity={0.7}>
-            <ProfileIcon active={true} />
-            <Text style={[styles.tabLabel, styles.tabLabelActive]}>Profile</Text>
-          </TouchableOpacity>
-        </View>
+        <TabBar activeScreen="Profile" navigation={navigation} />
       </View>
     </SafeAreaView>
   );
@@ -231,7 +190,7 @@ const styles = StyleSheet.create({
   shiftBadge: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 99, backgroundColor: "#E7F7EF", marginTop: 10 },
   shiftBadgeText: { fontSize: 11.5, fontWeight: "800", color: "#0C9D61" },
   statsGrid: { flexDirection: "row", gap: 10, marginTop: 20 },
-  statCard: { flex: 1, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E7EAF0", borderRadius: 16, padding: 13, alignItems: "center" },
+  statCard: { flex: 1, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E7EAF0", borderRadius: 16, paddingVertical: 13, paddingHorizontal: 14, alignItems: "center" },
   statValue: { fontSize: 20, fontWeight: "800", color: "#1C2B46" },
   statLabel: { fontSize: 10.5, fontWeight: "600", color: "#6C7A93", marginTop: 2 },
   settingsMenu: { backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E7EAF0", borderRadius: 18, marginTop: 16, overflow: "hidden" },
@@ -243,11 +202,6 @@ const styles = StyleSheet.create({
   bottomSection: { paddingHorizontal: 22, paddingTop: 14, paddingBottom: 10 },
   endShiftButton: { backgroundColor: "#FFFFFF", borderWidth: 1.5, borderColor: "#F3C9C9", borderRadius: 99, padding: 16, alignItems: "center" },
   endShiftButtonText: { color: "#E23D3D", fontSize: 15.5, fontWeight: "800" },
-  tabBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#FFFFFF", borderTopWidth: 1, borderTopColor: "#E7EAF0", paddingHorizontal: 30, paddingTop: 12, paddingBottom: 26 },
-  tabItem: { alignItems: "center", gap: 3 },
-  tabLabel: { fontSize: 10, fontWeight: "700", color: "#9AA6BC" },
-  tabLabelActive: { fontWeight: "800", color: "#F4531F" },
-  nfcTabButton: { width: 54, height: 54, borderRadius: 27, backgroundColor: "#F4531F", alignItems: "center", justifyContent: "center", marginTop: -30, borderWidth: 4, borderColor: "#F6F7F9", shadowColor: "#F4531F", shadowOpacity: 0.35, shadowOffset: { width: 0, height: 10 }, shadowRadius: 20, elevation: 8 },
 });
 
 export default DriverProfile;

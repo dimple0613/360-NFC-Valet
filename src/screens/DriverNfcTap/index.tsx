@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { View, TouchableOpacity, StyleSheet, Animated, Easing, ActivityIndicator, Alert } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { View, TouchableOpacity, StyleSheet, Animated, Easing, ActivityIndicator } from "react-native";
 import { Text, TextInput } from "@/theme";
 import Svg, { Path, Rect, Circle } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { http } from "../../api/client";
-import { ApiEndpoints } from "../../api/endpoints";
+import { useNfc } from "../../hooks/useNfc";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
+import { toast } from "../../utils/toast";
 
 type Props = RootStackScreenProps<"DriverNfcTap">;
 
@@ -80,21 +80,55 @@ const PulseRing = ({ delay }: { delay: number }) => {
 };
 
 const DriverNfcTap = ({ navigation }: Props) => {
+  const { supported, reading, readTag } = useNfc();
   const [manualUid, setManualUid] = useState("");
   const [showManual, setShowManual] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [detectedUid, setDetectedUid] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
-  const handleManualSubmit = async () => {
+  const goToDetails = useCallback(
+    (uid: string) => {
+      navigation.navigate("DriverCarDetails", { cardUid: uid });
+    },
+    [navigation],
+  );
+
+  useEffect(() => {
+    if (!supported || confirming) return;
+    let active = true;
+    const poll = async () => {
+      while (active) {
+        const uid = await readTag();
+        if (uid && active) {
+          setDetectedUid(uid);
+          setConfirming(true);
+          active = false;
+          return;
+        }
+      }
+    };
+    poll();
+    return () => {
+      active = false;
+    };
+  }, [supported, readTag, goToDetails, confirming]);
+
+  const handleManualSubmit = () => {
     if (!manualUid.trim()) {
-      Alert.alert("Enter card UID", "Type the 4-digit UID printed on the card.");
+      toast.error("Enter card number", "Type the 4-digit number printed on the card (e.g. 7001).");
       return;
     }
-    setLoading(true);
-    try {
-      navigation.navigate("DriverCarDetails", { cardUid: manualUid.trim() });
-    } finally {
-      setLoading(false);
-    }
+    goToDetails(manualUid.trim());
+  };
+
+  const handleConfirmDetected = () => {
+    if (detectedUid) goToDetails(detectedUid);
+  };
+
+  const handleDetectedWrong = () => {
+    setDetectedUid(null);
+    setConfirming(false);
+    setShowManual(true);
   };
 
   return (
@@ -121,27 +155,57 @@ const DriverNfcTap = ({ navigation }: Props) => {
             <LinearGradient
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              colors={["#F4531F", "#FF8A50"]}
+              colors={confirming ? ["#0C9D61", "#2ECC71"] : ["#F4531F", "#FF8A50"]}
               style={styles.nfcIconCircle}
             >
               <NfcCardIcon size={62} />
             </LinearGradient>
           </View>
 
-          <Text style={styles.holdTitle}>Hold card near phone</Text>
-          <Text style={styles.holdSubtitle}>
-            Reading writes the card ID automatically.{"\n"}You'll confirm the 4-digit UID printed on the card next.
-          </Text>
+          {confirming && detectedUid ? (
+            <>
+              <Text style={styles.detectedLabel}>Card detected</Text>
+              <Text style={styles.detectedUid}>{detectedUid}</Text>
+              <Text style={styles.holdSubtitle}>
+                Does this match the 4-digit number printed on the card?
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.holdTitle}>
+                {reading ? "Scanning..." : "Hold card near phone"}
+              </Text>
+              <Text style={styles.holdSubtitle}>
+                {supported
+                  ? "Reading writes the card ID automatically."
+                  : "NFC not available on this device."}
+                {"\n"}You'll confirm the 4-digit UID printed on the card next.
+              </Text>
+            </>
+          )}
         </View>
 
         <View style={styles.bottomButtonContainer}>
-          {showManual ? (
+          {confirming && detectedUid ? (
+            <View style={styles.confirmContainer}>
+              <TouchableOpacity activeOpacity={0.8} onPress={handleConfirmDetected}>
+                <View style={styles.confirmButton}>
+                  <Text style={styles.confirmButtonText}>Yes — continue</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.8} onPress={handleDetectedWrong}>
+                <View style={styles.wrongButton}>
+                  <Text style={styles.wrongButtonText}>Wrong card — enter manually</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          ) : showManual ? (
             <View style={styles.manualInputContainer}>
               <TextInput
                 style={styles.manualInput}
                 value={manualUid}
                 onChangeText={setManualUid}
-                placeholder="Enter 4-digit UID"
+                placeholder="e.g. 7001"
                 placeholderTextColor="#9AA6BC"
                 keyboardType="number-pad"
                 maxLength={6}
@@ -150,14 +214,9 @@ const DriverNfcTap = ({ navigation }: Props) => {
               <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={handleManualSubmit}
-                disabled={loading}
               >
                 <View style={styles.manualSubmitButton}>
-                  {loading ? (
-                    <ActivityIndicator color="#FFFFFF" size="small" />
-                  ) : (
-                    <Text style={styles.manualSubmitText}>Go</Text>
-                  )}
+                  <Text style={styles.manualSubmitText}>Go</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -298,6 +357,48 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "800",
+  },
+  detectedLabel: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#0C9D61",
+    marginTop: 36,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+  },
+  detectedUid: {
+    fontSize: 42,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    marginTop: 12,
+    letterSpacing: 4,
+  },
+  confirmContainer: {
+    gap: 12,
+  },
+  confirmButton: {
+    padding: 16,
+    borderRadius: 99,
+    backgroundColor: "#0C9D61",
+    alignItems: "center",
+  },
+  confirmButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  wrongButton: {
+    padding: 14,
+    borderRadius: 99,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.14)",
+    alignItems: "center",
+  },
+  wrongButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
 

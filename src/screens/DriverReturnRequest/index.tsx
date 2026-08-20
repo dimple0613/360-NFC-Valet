@@ -1,15 +1,17 @@
-import React, { useCallback } from "react";
-import { View, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Text } from "@/theme";
 import Svg, { Path, Circle } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../context/AuthContext";
+import { useSocket } from "../../context/SocketContext";
 import { http } from "../../api/client";
 import { ApiEndpoints } from "../../api/endpoints";
 import { useAsyncData } from "../../hooks/useAsyncData";
 import type { QueueItem } from "../../types";
 import type { RootStackScreenProps } from "../../navigation";
 import MobileStatusBar from "../../components/ui/StatusBar";
+import { toast } from "../../utils/toast";
 
 type Props = RootStackScreenProps<"DriverReturnRequest">;
 
@@ -22,6 +24,8 @@ const CarIcon = ({ size = 27 }: { size?: number }) => (
   </Svg>
 );
 
+const PASS_TIMEOUT = 15;
+
 const DriverReturnRequest = ({ navigation }: Props) => {
   const { driver } = useAuth();
   const fetchQueue = useCallback(
@@ -32,10 +36,49 @@ const DriverReturnRequest = ({ navigation }: Props) => {
   const { data: profileData } = useAsyncData<{ driver: { fullName: string; initials: string; status: string } }>(
     () => http.get(ApiEndpoints.driver.profile),
   );
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+    const onEvent = () => reload();
+    socket.on("valet.order.return.requested", onEvent);
+    socket.on("valet.order.completed", onEvent);
+    socket.on("valet.order.created", onEvent);
+    return () => {
+      socket.off("valet.order.return.requested", onEvent);
+      socket.off("valet.order.completed", onEvent);
+      socket.off("valet.order.created", onEvent);
+    };
+  }, [socket, reload]);
 
   const returnRequests = (data?.queue ?? []).filter((i) => i.status === "returning" && !i.isMine);
   const current = returnRequests[0];
+  const rotationIndex = current ? (data?.queue ?? []).filter((i) => i.status === "returning").indexOf(current) ?? 0 : 0;
+  const totalReturning = (data?.queue ?? []).filter((i) => i.status === "returning").length;
   const profile = profileData?.driver;
+
+  const [passTimer, setPassTimer] = useState(PASS_TIMEOUT);
+
+  useEffect(() => {
+    if (!current) return;
+    setPassTimer(PASS_TIMEOUT);
+    const interval = setInterval(() => {
+      setPassTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [current?.id, navigation]);
+
+  useEffect(() => {
+    if (passTimer === 0 && current) {
+      navigation.goBack();
+    }
+  }, [passTimer, current, navigation]);
 
   const handleAccept = async () => {
     if (!current) return;
@@ -48,8 +91,20 @@ const DriverReturnRequest = ({ navigation }: Props) => {
       navigation.navigate("DriverPickupRequests");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to accept";
-      Alert.alert("Error", message);
+      toast.error("Error", message);
     }
+  };
+
+  const formatCountdown = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const formatEta = (eta: string) => {
+    const diff = new Date(eta).getTime() - Date.now();
+    const mins = Math.max(0, Math.ceil(diff / 60000));
+    return mins <= 0 ? "Now" : `${mins} min`;
   };
 
   const initials = profile?.initials ?? driver?.initials ?? "??";
@@ -68,7 +123,7 @@ const DriverReturnRequest = ({ navigation }: Props) => {
             </View>
             <View>
               <Text style={styles.driverName}>{fullName}</Text>
-              <Text style={styles.driverStatus}>{isOnShift ? "On shift" : "Off duty"}</Text>
+              <Text style={styles.driverStatus}>{isOnShift ? "\u25CF On shift" : "Off duty"}</Text>
             </View>
           </View>
         </View>
@@ -90,8 +145,9 @@ const DriverReturnRequest = ({ navigation }: Props) => {
             <>
               <View style={styles.sheetHeader}>
                 <View style={styles.requestBadge}>
-                  <Text style={styles.requestBadgeText}>New return request</Text>
+                  <Text style={styles.requestBadgeText}>{"\u25CF"} New return request</Text>
                 </View>
+                <Text style={styles.rotationText}>Your turn {"\u00B7"} rotation {rotationIndex + 1} of {totalReturning}</Text>
               </View>
 
               <View style={styles.carSection}>
@@ -107,13 +163,13 @@ const DriverReturnRequest = ({ navigation }: Props) => {
               <View style={styles.infoGrid}>
                 <View style={styles.infoCard}>
                   <Text style={styles.infoLabel}>PARKED AT</Text>
-                  <Text style={styles.infoValue}>Zone {current.zone ?? "?"} · {current.slot ?? "?"}</Text>
+                  <Text style={styles.infoValue}>Zone {current.zone ?? "?"} {"\u00B7"} {current.slot ?? "?"}</Text>
                 </View>
                 {current.guestEta && (
-                  <View style={[styles.infoCard, { backgroundColor: "#FDF3E3" }]}>
-                    <Text style={[styles.infoLabel, { color: "#B97B17" }]}>GUEST ETA</Text>
-                    <Text style={[styles.infoValue, { color: "#B97B17" }]}>
-                      {new Date(current.guestEta).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                  <View style={styles.infoCardAmber}>
+                    <Text style={styles.infoLabelAmber}>GUEST ARRIVES IN</Text>
+                    <Text style={styles.infoValueAmber}>
+                      {formatEta(current.guestEta)}
                     </Text>
                   </View>
                 )}
@@ -125,14 +181,14 @@ const DriverReturnRequest = ({ navigation }: Props) => {
                   activeOpacity={0.7}
                   onPress={() => navigation.goBack()}
                 >
-                  <Text style={styles.passButtonText}>Pass</Text>
+                  <Text style={styles.passButtonText}>Pass {"\u00B7"} {formatCountdown(passTimer)}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.acceptButton}
                   activeOpacity={0.8}
                   onPress={handleAccept}
                 >
-                  <Text style={styles.acceptButtonText}>Accept — get the car</Text>
+                  <Text style={styles.acceptButtonText}>Accept {"\u2014"} get the car</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -157,6 +213,7 @@ const styles = StyleSheet.create({
   sheetHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   requestBadge: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 99, backgroundColor: "#FEEFE8" },
   requestBadgeText: { fontSize: 11.5, fontWeight: "800", color: "#D6430F" },
+  rotationText: { fontSize: 12, fontWeight: "700", color: "#6C7A93" },
   carSection: { flexDirection: "row", gap: 15, alignItems: "center", marginTop: 18 },
   carIconTile: { width: 58, height: 58, borderRadius: 17, backgroundColor: "#1C2B46", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   carPlate: { fontSize: 19, fontWeight: "800", letterSpacing: 0.3, color: "#1C2B46" },
@@ -165,6 +222,9 @@ const styles = StyleSheet.create({
   infoCard: { flex: 1, backgroundColor: "#F6F7F9", borderRadius: 14, padding: 12, paddingLeft: 14 },
   infoLabel: { fontSize: 10.5, fontWeight: "800", letterSpacing: 1.2, color: "#6C7A93", textTransform: "uppercase" },
   infoValue: { fontSize: 15, fontWeight: "800", marginTop: 2, color: "#1C2B46" },
+  infoCardAmber: { flex: 1, backgroundColor: "#FDF3E3", borderRadius: 14, padding: 12, paddingLeft: 14 },
+  infoLabelAmber: { fontSize: 10.5, fontWeight: "800", letterSpacing: 1.2, color: "#B97B17", textTransform: "uppercase" },
+  infoValueAmber: { fontSize: 15, fontWeight: "800", marginTop: 2, color: "#B97B17" },
   actionButtons: { flexDirection: "row", gap: 10, marginTop: 18 },
   passButton: { flex: 1, padding: 15, borderRadius: 99, backgroundColor: "#FFFFFF", borderWidth: 1.5, borderColor: "#E7EAF0", alignItems: "center" },
   passButtonText: { color: "#6C7A93", fontSize: 14.5, fontWeight: "700" },

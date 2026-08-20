@@ -14,5 +14,8 @@ export const ApiEndpoints = {
     properties: "/driver/properties",
     history: "/driver/history",
     profile: "/driver/profile",
+    scanPlate: "/driver/scan-plate",
+    pushToken: "/driver/push-token",
+    notifyDelay: "/driver/notify-delay",
   },
 } as const;
