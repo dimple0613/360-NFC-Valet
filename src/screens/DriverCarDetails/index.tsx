@@ -142,10 +142,13 @@ const DriverCarDetails = ({ navigation, route }: Props) => {
       } else {
         payload.cardUid = cardUid;
       }
-      const res = await http.post<{ orderId: number; createdAt: string }>(
+      const res = await http.post<{ orderId: number; createdAt: string; cardNumber?: string }>(
         ApiEndpoints.driver.orders,
         payload,
       );
+      if (res.cardNumber) {
+        toast.info(`Card #${res.cardNumber} registered`, "Write this number on the card so guests can tap it on the web page.");
+      }
       navigation.replace("DriverCardActivated", {
         orderId: res.orderId,
         plate: plate.trim(),
