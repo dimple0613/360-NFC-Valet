@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { View, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { Text } from "@/theme";
 import Svg, { Path, Circle } from "react-native-svg";
@@ -36,12 +36,17 @@ const CheckIcon = () => (
 );
 
 const TimerRing = ({ seconds }: { seconds: number }) => {
-  const maxSeconds = 10 * 60;
-  const progress = Math.min(Math.max(seconds, 0) / maxSeconds, 1);
+  const maxRef = useRef<number | null>(null);
+  const clamped = Math.max(seconds, 0);
+  if (maxRef.current == null || clamped > maxRef.current) {
+    maxRef.current = Math.max(60, Math.ceil(clamped / 60) * 60);
+  }
+  const maxSeconds = maxRef.current;
+  const progress = Math.min(clamped / maxSeconds, 1);
   const circumference = 2 * Math.PI * 84;
   const dashoffset = circumference * (1 - progress);
-  const m = Math.floor(Math.max(seconds, 0) / 60);
-  const s = Math.max(seconds, 0) % 60;
+  const m = Math.floor(clamped / 60);
+  const s = clamped % 60;
   const display = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 
   return (
