@@ -42,7 +42,7 @@ const DriverHistory = ({ navigation }: Props) => {
     ),
     [activeFilter],
   );
-  const { data, loading, error, reload } = useAsyncData<{ stats: { total: number; avgReturnMin: number }; history: HistoryItem[] }>(fetchHistory);
+  const { data, loading, error, reload } = useAsyncData<{ stats: { total: number; avgReturnMin: number }; history: HistoryItem[] }>(fetchHistory, [fetchHistory]);
 
   const stats = data?.stats;
   const history = data?.history ?? [];
