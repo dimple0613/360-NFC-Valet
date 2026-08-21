@@ -126,7 +126,7 @@ const DriverCarDetails = ({ navigation, route }: Props) => {
     }
     setLoading(true);
     try {
-      const payload: Record<string, string> = {
+      const payload: Record<string, string | boolean> = {
         plate: plate.trim(),
       };
       const make = carMake.trim();
@@ -137,6 +137,7 @@ const DriverCarDetails = ({ navigation, route }: Props) => {
       if (color) payload.carColor = color;
       if (retryCardNumber) {
         payload.cardNumber = retryCardNumber;
+        payload.createCard = true;
         if (cardUid) payload.cardUid = cardUid;
       } else {
         payload.cardUid = cardUid;
@@ -314,7 +315,7 @@ const DriverCarDetails = ({ navigation, route }: Props) => {
             <View style={styles.cardNotFoundBox}>
               <Text style={styles.cardNotFoundTitle}>First time with this card</Text>
               <Text style={styles.cardNotFoundHint}>
-                This card isn't linked yet. Type the 4-digit number printed on it — just once. We'll remember this card automatically from now on.
+                This card isn't registered yet. Type the 4-digit number printed on it — just once. If it's a brand-new card we'll add it to the system, and we'll remember this chip from now on.
               </Text>
               <View style={styles.cardNumberRow}>
                 <TextInput
