@@ -20,10 +20,16 @@ export type TagRead = {
   rawUid: string | null;
 };
 
+function formatTagId(id: string): string {
+  const clean = id.replace(/[^0-9a-fA-F]/g, "");
+  const pairs = clean.match(/.{1,2}/g) ?? [];
+  return pairs.join(":").toUpperCase();
+}
+
 function extractUidFromTag(tag: unknown): string | null {
   const rawUid = (tag as { id?: string })?.id;
   if (!rawUid) return null;
-  return rawUid;
+  return formatTagId(rawUid);
 }
 
 function extractCardNumberFromNdef(message: unknown): string | null {

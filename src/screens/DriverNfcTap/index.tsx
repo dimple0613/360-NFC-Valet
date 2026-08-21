@@ -83,9 +83,6 @@ const DriverNfcTap = ({ navigation }: Props) => {
   const { supported, reading, readTag } = useNfc();
   const [manualUid, setManualUid] = useState("");
   const [showManual, setShowManual] = useState(false);
-  const [detectedUid, setDetectedUid] = useState<string | null>(null);
-  const [confirming, setConfirming] = useState(false);
-  const [noNumber, setNoNumber] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
 
   const goToDetails = useCallback(
@@ -96,7 +93,7 @@ const DriverNfcTap = ({ navigation }: Props) => {
   );
 
   useEffect(() => {
-    if (!supported || confirming || timedOut) return;
+    if (!supported || showManual || timedOut) return;
     let active = true;
     const timer = setTimeout(() => {
       if (!active) return;
@@ -110,16 +107,10 @@ const DriverNfcTap = ({ navigation }: Props) => {
         if (!result || !active) continue;
         active = false;
         clearTimeout(timer);
-        if (result.fromNdef && result.uid) {
+        if (result.uid) {
           goToDetails(result.uid);
           return;
         }
-        if (result.uid) {
-          setDetectedUid(result.uid);
-          setConfirming(true);
-          return;
-        }
-        setNoNumber(true);
         setShowManual(true);
         return;
       }
@@ -129,24 +120,15 @@ const DriverNfcTap = ({ navigation }: Props) => {
       active = false;
       clearTimeout(timer);
     };
-  }, [supported, readTag, goToDetails, confirming, timedOut]);
+  }, [supported, readTag, goToDetails, showManual, timedOut]);
 
   const handleManualSubmit = () => {
-    if (!manualUid.trim()) {
+    const num = manualUid.trim();
+    if (!/^\d{4}$/.test(num)) {
       toast.error("Enter card number", "Type the 4-digit number printed on the card (e.g. 7001).");
       return;
     }
-    goToDetails(manualUid.trim());
-  };
-
-  const handleConfirmDetected = () => {
-    if (detectedUid) goToDetails(detectedUid);
-  };
-
-  const handleDetectedWrong = () => {
-    setDetectedUid(null);
-    setConfirming(false);
-    setShowManual(true);
+    goToDetails(num);
   };
 
   return (
@@ -173,34 +155,18 @@ const DriverNfcTap = ({ navigation }: Props) => {
             <LinearGradient
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              colors={confirming ? ["#0C9D61", "#2ECC71"] : ["#F4531F", "#FF8A50"]}
+              colors={["#F4531F", "#FF8A50"]}
               style={styles.nfcIconCircle}
             >
               <NfcCardIcon size={62} />
             </LinearGradient>
           </View>
 
-          {confirming && detectedUid ? (
-            <>
-              <Text style={styles.detectedLabel}>Card detected</Text>
-              <Text style={styles.detectedUid}>{detectedUid}</Text>
-              <Text style={styles.holdSubtitle}>
-                This is the serial number of the card. Continue with this card?
-              </Text>
-            </>
-          ) : timedOut ? (
+          {timedOut ? (
             <>
               <Text style={styles.holdTitle}>No card detected</Text>
               <Text style={styles.holdSubtitle}>
                 We couldn't read a card. Make sure NFC is on and hold the card flat on the back of the phone, then try again.
-              </Text>
-            </>
-          ) : noNumber ? (
-            <>
-              <Text style={styles.holdTitle}>Card detected</Text>
-              <Text style={styles.holdSubtitle}>
-                No number is stored on this card.
-                {"\n"}Use "Write / encode a card" from the Home screen to store it, or enter the number printed on the card manually below.
               </Text>
             </>
           ) : (
@@ -210,7 +176,7 @@ const DriverNfcTap = ({ navigation }: Props) => {
               </Text>
               <Text style={styles.holdSubtitle}>
                 {supported
-                  ? "Tap the card on the back of the phone to read its serial number."
+                  ? "Tap the card on the back of the phone to read it."
                   : "NFC not available on this device."}
               </Text>
             </>
@@ -218,26 +184,13 @@ const DriverNfcTap = ({ navigation }: Props) => {
         </View>
 
         <View style={styles.bottomButtonContainer}>
-          {confirming && detectedUid ? (
-            <View style={styles.confirmContainer}>
-              <TouchableOpacity activeOpacity={0.8} onPress={handleConfirmDetected}>
-                <View style={styles.confirmButton}>
-                  <Text style={styles.confirmButtonText}>Yes — continue</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity activeOpacity={0.8} onPress={handleDetectedWrong}>
-                <View style={styles.wrongButton}>
-                  <Text style={styles.wrongButtonText}>Wrong card — enter manually</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          ) : timedOut ? (
+          {timedOut ? (
             <TouchableOpacity activeOpacity={0.8} onPress={() => setTimedOut(false)}>
               <View style={styles.manualButton}>
                 <Text style={styles.manualButtonText}>Try again</Text>
               </View>
             </TouchableOpacity>
-          ) : showManual || noNumber ? (
+          ) : showManual ? (
             <View style={styles.manualInputContainer}>
               <TextInput
                 style={styles.manualInput}
@@ -246,7 +199,7 @@ const DriverNfcTap = ({ navigation }: Props) => {
                 placeholder="e.g. 7001"
                 placeholderTextColor="#9AA6BC"
                 keyboardType="number-pad"
-                maxLength={6}
+                maxLength={4}
                 autoFocus
               />
               <TouchableOpacity
@@ -395,48 +348,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "800",
-  },
-  detectedLabel: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#0C9D61",
-    marginTop: 36,
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-  },
-  detectedUid: {
-    fontSize: 42,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    marginTop: 12,
-    letterSpacing: 4,
-  },
-  confirmContainer: {
-    gap: 12,
-  },
-  confirmButton: {
-    padding: 16,
-    borderRadius: 99,
-    backgroundColor: "#0C9D61",
-    alignItems: "center",
-  },
-  confirmButtonText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  wrongButton: {
-    padding: 14,
-    borderRadius: 99,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.14)",
-    alignItems: "center",
-  },
-  wrongButtonText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
   },
 });
 

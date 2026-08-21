@@ -164,7 +164,7 @@ const DriverCarDetails = ({ navigation, route }: Props) => {
 
   const handleManualCardSubmit = () => {
     const num = manualCardNumber.trim();
-    if (!num) {
+    if (!/^\d{4}$/.test(num)) {
       toast.error("Enter card number", "Type the 4-digit number printed on the card.");
       return;
     }
@@ -322,7 +322,7 @@ const DriverCarDetails = ({ navigation, route }: Props) => {
                   placeholder="e.g. 7001"
                   placeholderTextColor="#9AA6BC"
                   keyboardType="number-pad"
-                  maxLength={6}
+                  maxLength={4}
                   autoFocus
                 />
                 <TouchableOpacity activeOpacity={0.8} onPress={handleManualCardSubmit} disabled={loading}>
