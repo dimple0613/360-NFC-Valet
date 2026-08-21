@@ -1,13 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./AuthContext";
-import { API_URL } from "../config";
 import { toast } from "../utils/toast";
 import { storage, StorageKeys } from "../services/storage";
 import { registerForPushNotifications } from "../utils/notifications";
 import { http } from "../api/client";
 
-const WS_URL = API_URL.replace("/api", "").replace(":3000", ":3002");
+const WS_URL = process.env.EXPO_PUBLIC_WS_URL ?? "";
 
 type SocketState = {
   connected: boolean;
@@ -24,6 +23,16 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!driver) return;
+
+    registerForPushNotifications()
+      .then((pushToken) => {
+        if (pushToken) {
+          http.post("/driver/push-token", { pushToken }).catch(() => {});
+        }
+      })
+      .catch(() => {});
+
+    if (!WS_URL) return;
     let s: Socket;
 
     const connect = async () => {
@@ -41,11 +50,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         if (driver.propertyId) {
           s.emit("subscribe:property", driver.propertyId);
         }
-        registerForPushNotifications().then((pushToken) => {
-          if (pushToken) {
-            http.post("/driver/push-token", { pushToken }).catch(() => {});
-          }
-        }).catch(() => {});
       });
 
       s.on("disconnect", (reason) => {

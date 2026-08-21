@@ -23,7 +23,7 @@ const DriverPickupRequests = ({ navigation }: Props) => {
     () => http.get<{ queue: QueueItem[] }>(ApiEndpoints.driver.queue),
     [],
   );
-  const { data, loading, reload } = useAsyncData<{ queue: QueueItem[] }>(fetchQueue);
+  const { data, loading, error, reload } = useAsyncData<{ queue: QueueItem[] }>(fetchQueue);
   const { socket } = useSocket();
 
   useEffect(() => {
@@ -41,7 +41,19 @@ const DriverPickupRequests = ({ navigation }: Props) => {
     };
   }, [socket, reload]);
 
+  useEffect(() => {
+    if (socket) return;
+    const t = setInterval(() => reload(), 15000);
+    return () => clearInterval(t);
+  }, [socket, reload]);
+
   const allItems = data?.queue ?? [];
+
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
   const activeItems = allItems.filter((i) => i.status === "returning" || i.status === "retrieving");
   const toParkItems = allItems.filter((i) => i.status === "active");
   const doneItems = allItems.filter((i) => i.status === "returned" || i.status === "parked");
@@ -76,7 +88,7 @@ const DriverPickupRequests = ({ navigation }: Props) => {
 
   const formatOverdueTime = (eta: string | null): string => {
     if (!eta) return "-00:00";
-    const diff = new Date(eta).getTime() - Date.now();
+    const diff = new Date(eta).getTime() - now;
     const absDiff = Math.abs(diff);
     const totalSec = Math.floor(absDiff / 1000);
     const m = Math.floor(totalSec / 60);
@@ -86,7 +98,7 @@ const DriverPickupRequests = ({ navigation }: Props) => {
 
   const formatEta = (eta: string | null) => {
     if (!eta) return null;
-    const diff = new Date(eta).getTime() - Date.now();
+    const diff = new Date(eta).getTime() - now;
     if (diff <= 0) return null;
     const totalSec = Math.floor(diff / 1000);
     const m = Math.floor(totalSec / 60);
@@ -96,7 +108,7 @@ const DriverPickupRequests = ({ navigation }: Props) => {
 
   const getEtaMinutes = (eta: string | null): number | null => {
     if (!eta) return null;
-    const diff = new Date(eta).getTime() - Date.now();
+    const diff = new Date(eta).getTime() - now;
     return Math.floor(diff / 60000);
   };
 
@@ -183,6 +195,10 @@ const DriverPickupRequests = ({ navigation }: Props) => {
         <ScrollView style={styles.flex} contentContainerStyle={styles.scrollContent}>
           {loading ? (
             <ActivityIndicator size="small" color="#F4531F" style={{ marginTop: 24 }} />
+          ) : error ? (
+            <TouchableOpacity onPress={reload} activeOpacity={0.7}>
+              <Text style={[styles.emptyText, { color: "#F4531F" }]}>Failed to load {"\u2014"} tap to retry</Text>
+            </TouchableOpacity>
           ) : displayedItems.length === 0 ? (
             <Text style={styles.emptyText}>No items</Text>
           ) : (

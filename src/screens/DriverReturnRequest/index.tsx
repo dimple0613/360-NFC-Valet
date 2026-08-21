@@ -51,6 +51,12 @@ const DriverReturnRequest = ({ navigation }: Props) => {
     };
   }, [socket, reload]);
 
+  useEffect(() => {
+    if (socket) return;
+    const t = setInterval(() => reload(), 15000);
+    return () => clearInterval(t);
+  }, [socket, reload]);
+
   const returnRequests = (data?.queue ?? []).filter((i) => i.status === "returning" && !i.isMine);
   const current = returnRequests[0];
   const rotationIndex = current ? (data?.queue ?? []).filter((i) => i.status === "returning").indexOf(current) ?? 0 : 0;

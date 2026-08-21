@@ -27,6 +27,11 @@ const formatDuration = (seconds: number | null) => {
   return `${m} m ${String(s).padStart(2, "0")} s`;
 };
 
+const formatAvg = (min: number | undefined) => {
+  const m = min ?? 0;
+  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`;
+};
+
 const getTimePeriod = (dateStr: string): string => {
   const hour = new Date(dateStr).getHours();
   if (hour < 12) return "Morning";
@@ -96,7 +101,7 @@ const DriverHistory = ({ navigation }: Props) => {
             <Text style={styles.statLabel}>Orders completed</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: "#0C9D61" }]}>{loading ? "\u2014" : `${stats?.avgReturnMin ?? 0}:00`}</Text>
+            <Text style={[styles.statValue, { color: "#0C9D61" }]}>{loading ? "\u2014" : formatAvg(stats?.avgReturnMin)}</Text>
             <Text style={styles.statLabel}>Avg retrieval time</Text>
           </View>
         </View>

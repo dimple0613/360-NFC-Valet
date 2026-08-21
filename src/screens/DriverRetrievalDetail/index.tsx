@@ -93,6 +93,12 @@ const DriverRetrievalDetail = ({ navigation, route }: Props) => {
     };
   }, [socket, reload]);
 
+  useEffect(() => {
+    if (socket) return;
+    const t = setInterval(() => reload(), 15000);
+    return () => clearInterval(t);
+  }, [socket, reload]);
+
   const order = data?.queue.find((q) => q.id === orderId);
 
   const [now, setNow] = useState(Date.now());

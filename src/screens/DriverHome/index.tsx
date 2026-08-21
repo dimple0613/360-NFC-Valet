@@ -56,6 +56,11 @@ const ChevronRight = ({ color = "#fff", size = 20 }: { color?: string; size?: nu
 
 type DashboardData = { stats: DashboardStats; queue: QueueItem[] };
 
+const formatAvg = (min: number | undefined) => {
+  const m = min ?? 0;
+  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m} min`;
+};
+
 const DriverHome = ({ navigation }: Props) => {
   const { driver } = useAuth();
   const fetchDashboard = useCallback(
@@ -78,6 +83,12 @@ const DriverHome = ({ navigation }: Props) => {
       socket.off("valet.order.completed", onEvent);
       socket.off("valet.order.return.requested", onEvent);
     };
+  }, [socket, reload]);
+
+  useEffect(() => {
+    if (socket) return;
+    const t = setInterval(() => reload(), 15000);
+    return () => clearInterval(t);
   }, [socket, reload]);
 
   const stats = data?.stats;
@@ -121,7 +132,7 @@ const DriverHome = ({ navigation }: Props) => {
               <Text style={styles.statLabel}>Returns pending</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={[styles.statValue, { color: "#0C9D61" }]}>{loading ? "—" : `${stats?.avgReturnMin ?? 0}:00`}</Text>
+              <Text style={[styles.statValue, { color: "#0C9D61" }]}>{loading ? "—" : formatAvg(stats?.avgReturnMin)}</Text>
               <Text style={styles.statLabel}>Avg return</Text>
             </View>
           </View>
