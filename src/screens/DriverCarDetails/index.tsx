@@ -312,8 +312,10 @@ const DriverCarDetails = ({ navigation, route }: Props) => {
 
           {cardNotFound && (
             <View style={styles.cardNotFoundBox}>
-              <Text style={styles.cardNotFoundTitle}>Card not recognized</Text>
-              <Text style={styles.cardNotFoundHint}>NFC UID didn't match. Enter the 4-digit number printed on the card:</Text>
+              <Text style={styles.cardNotFoundTitle}>First time with this card</Text>
+              <Text style={styles.cardNotFoundHint}>
+                This card isn't linked yet. Type the 4-digit number printed on it — just once. We'll remember this card automatically from now on.
+              </Text>
               <View style={styles.cardNumberRow}>
                 <TextInput
                   style={styles.cardNumberInput}
